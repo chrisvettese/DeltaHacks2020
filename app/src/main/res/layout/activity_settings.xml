@@ -9,13 +9,16 @@
     <Button
             android:text="Camera"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:id="@+id/cameraButton" tools:layout_editor_absoluteY="372dp"
+            android:layout_height="wrap_content" android:id="@+id/cameraButton"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"/>
+            app:layout_constraintHorizontal_bias="0.498" android:visibility="invisible" android:onClick="cameraClick"
+            app:layout_constraintTop_toBottomOf="@+id/userButton" android:layout_marginTop="28dp"/>
     <Button
             android:text="User"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" tools:layout_editor_absoluteY="295dp"
+            android:layout_height="wrap_content"
             android:id="@+id/userButton" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.498"/>
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.498"
+            android:visibility="invisible" android:onClick="userClick" app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="288dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

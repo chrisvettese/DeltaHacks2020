@@ -3,6 +3,9 @@ package com.team.deltahacks2020;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -12,17 +15,25 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import javax.annotation.Nonnull;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SettingsActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     String userID;
+    Button userButt;
+    Button camButt;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        userButt = findViewById(R.id.userButton);
+        camButt = findViewById(R.id.cameraButton);
 
         //reads from a file the userID
         //userID = readFromFile();
@@ -33,64 +44,45 @@ public class SettingsActivity extends AppCompatActivity {
                 .addOnCompleteListener((@Nonnull Task<DocumentSnapshot> task)-> {
                     if(!task.isSuccessful()){
                         //ask if user or camera
-                        //TODO find out how to ask user if it is a camera
-                        //if user
-                        if(true){
-                            //save id to firebase
-                            //save id to phone file
 
-
-
-
-
-
-                        }
-                        else{
-
-
-                        }
+                        camButt.setVisibility(View.VISIBLE);
+                        userButt.setVisibility(View.VISIBLE);
                     }
-
-
+                    /*
                     else{
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()){
                             String phoneID = task.getResult().get("userID").toString();
-
-
                             //this means the phone is user
                             if(userID == phoneID){
-
                             }
                             //this means the phone is a camera
                             else{
-
-
                             }
-
-
-
                         }
-
-                    }
-
-
-
-
+                    }*/
                 });
 
+        long time = System.currentTimeMillis();
+        try {
+            FileOutputStream fileout=openFileOutput("mytextfile.txt", MODE_PRIVATE);
+            OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
+            //outputWriter.write(textmsg.getText().toString());
+            outputWriter.write(Long.toString(time));
+            outputWriter.close();
 
+            //display file saved message
+            Toast.makeText(getBaseContext(), "File saved successfully!",
+                    Toast.LENGTH_SHORT).show();
 
-
-
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
     private String readFromFile() {
-
         String ret = "";
-
         try {
             InputStream inputStream = openFileInput("settings.txt");
 
@@ -116,4 +108,41 @@ public class SettingsActivity extends AppCompatActivity {
 
         return ret;
     }
+
+    public void cameraClick(View view){
+
+
+    }
+    public void userClick(View view){
+
+        //save id to firebase
+        Map<String,Object> idMap = new HashMap<>();
+        long time = System.currentTimeMillis();
+        idMap.put(userID, time );
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).set(idMap);
+
+        //save id to internal Storage
+        //File file = new File("controller.txt");
+        /*
+
+        try {
+            FileOutputStream fileout=openFileOutput("mytextfile.txt", MODE_PRIVATE);
+            OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
+            //outputWriter.write(textmsg.getText().toString());
+            outputWriter.write(Long.toString(time));
+            outputWriter.close();
+
+            //display file saved message
+            Toast.makeText(getBaseContext(), "File saved successfully!",
+                    Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+
+
+
+    }
+
+
 }

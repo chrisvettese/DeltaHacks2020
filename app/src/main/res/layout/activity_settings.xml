@@ -6,14 +6,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".SettingsActivity">
-
-    <TextView
+    <Button
+            android:text="Camera"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
+            android:layout_height="wrap_content" android:id="@+id/cameraButton" tools:layout_editor_absoluteY="372dp"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"/>
+    <Button
+            android:text="User"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" tools:layout_editor_absoluteY="295dp"
+            android:id="@+id/userButton" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.498"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

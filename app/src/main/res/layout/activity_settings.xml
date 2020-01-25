@@ -11,11 +11,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:id="@+id/cameraButton" tools:layout_editor_absoluteY="372dp"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"/>
+            app:layout_constraintHorizontal_bias="0.498" android:visibility="invisible" android:onClick="cameraClick"/>
     <Button
             android:text="User"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" tools:layout_editor_absoluteY="295dp"
             android:id="@+id/userButton" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.498"/>
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.498"
+            android:visibility="invisible" android:onClick="userClick"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,6 +3,8 @@ package com.team.deltahacks2020;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -18,11 +20,17 @@ public class SettingsActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     String userID;
+    Button userButt;
+    Button camButt;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        userButt = findViewById(R.id.userButton);
+        camButt = findViewById(R.id.cameraButton);
 
         //reads from a file the userID
         //userID = readFromFile();
@@ -34,49 +42,28 @@ public class SettingsActivity extends AppCompatActivity {
                     if(!task.isSuccessful()){
                         //ask if user or camera
                         //TODO find out how to ask user if it is a camera
-                        //if user
+                        camButt.setVisibility(View.VISIBLE);
+                        userButt.setVisibility(View.VISIBLE);
+
                         if(true){
                             //save id to firebase
                             //save id to phone file
-
-
-
-
-
-
                         }
                         else{
-
-
                         }
                     }
-
-
                     else{
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()){
                             String phoneID = task.getResult().get("userID").toString();
-
-
                             //this means the phone is user
                             if(userID == phoneID){
-
                             }
                             //this means the phone is a camera
                             else{
-
-
                             }
-
-
-
                         }
-
                     }
-
-
-
-
                 });
 
 
@@ -88,9 +75,7 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     private String readFromFile() {
-
         String ret = "";
-
         try {
             InputStream inputStream = openFileInput("settings.txt");
 
@@ -116,4 +101,16 @@ public class SettingsActivity extends AppCompatActivity {
 
         return ret;
     }
+
+    public void cameraClick(View view){
+
+
+
+    }
+    public void userClick(View view){
+
+
+    }
+
+
 }

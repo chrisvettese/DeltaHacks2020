@@ -62,6 +62,22 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }*/
                 });
+
+        long time = System.currentTimeMillis();
+        try {
+            FileOutputStream fileout=openFileOutput("mytextfile.txt", MODE_PRIVATE);
+            OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
+            //outputWriter.write(textmsg.getText().toString());
+            outputWriter.write(Long.toString(time));
+            outputWriter.close();
+
+            //display file saved message
+            Toast.makeText(getBaseContext(), "File saved successfully!",
+                    Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -107,6 +123,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         //save id to internal Storage
         //File file = new File("controller.txt");
+        /*
 
         try {
             FileOutputStream fileout=openFileOutput("mytextfile.txt", MODE_PRIVATE);
@@ -121,7 +138,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
 
 

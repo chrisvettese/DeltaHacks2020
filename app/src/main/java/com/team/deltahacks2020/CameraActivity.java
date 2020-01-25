@@ -3,10 +3,13 @@ package com.team.deltahacks2020;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.*;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Size;
@@ -177,6 +180,7 @@ public class CameraActivity extends AppCompatActivity {
                                 CameraActivity.this.cameraCaptureSession = cameraCaptureSession;
                                 CameraActivity.this.cameraCaptureSession.setRepeatingRequest(captureRequest,
                                         null, backgroundHandler);
+                                startTakingPictures();
                             } catch (CameraAccessException e) {
                                 e.printStackTrace();
                             }
@@ -190,5 +194,16 @@ public class CameraActivity extends AppCompatActivity {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
+    }
+    private void startTakingPictures() {
+        new CountDownTimer(3000000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                Bitmap bitmap = textureView.getBitmap();
+                System.out.println(Color.red(bitmap.getPixel(10, 10)));
+            }
+
+            public void onFinish() { }
+        }.start();
     }
 }

@@ -1,17 +1,14 @@
 package com.team.deltahacks2020;
 
+
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.Task;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         signIn = findViewById(R.id.sign_in_button);
+
         signIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
 //    protected void onStart() {
 //        super.onStart();
 //        account = GoogleSignIn.getLastSignedInAccount(this);
+//
 //    }
 
     private void signIn() {
@@ -67,18 +66,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+//    private void updateUI(boolean signedIn) {
+//        if (signedIn) {
+//            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+//        } else {
+//            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+//        }
+//    }
+
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+
         try {
+           //signed in successfully
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
-            // Signed in successfully, show authenticated UI.
-//            updateUI(account);
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            Log.w("Error", "signInResult:failed code=" + e.getStatusCode());
 
+        } catch (ApiException e) {
+            Log.w("Error", "signInResult:failed code=" + e.getStatusCode());
         }
+
+//            Context context = getApplicationContext();
+//            CharSequence text = "Signed in successfully.";
+//            int duration = Toast.LENGTH_SHORT;
+//
+//            Toast toast = Toast.makeText(context, text, duration);
+//            toast.show();
+
+
+
     }
 
 

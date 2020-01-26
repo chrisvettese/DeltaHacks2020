@@ -29,6 +29,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
+import com.google.firebase.ml.vision.face.FirebaseVisionFace;
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
+import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
+import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetector;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions;
@@ -56,7 +61,9 @@ public class CameraActivity extends AppCompatActivity {
     private CameraCaptureSession cameraCaptureSession;
     private TextureView textureView;
     private CountDownTimer pictureTimer;
-    private FirebaseVisionObjectDetector objectDetector;
+
+    private FirebaseVisionImageLabeler labeler;
+    private FirebaseVisionFaceDetector detector;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
@@ -77,13 +84,18 @@ public class CameraActivity extends AppCompatActivity {
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         cameraFacing = CameraCharacteristics.LENS_FACING_BACK;
 
-        FirebaseVisionObjectDetectorOptions options =
-                new FirebaseVisionObjectDetectorOptions.Builder()
-                        .setDetectorMode(FirebaseVisionObjectDetectorOptions.SINGLE_IMAGE_MODE)
-                        .enableMultipleObjects()
-                        .enableClassification()  // Optional
+        FirebaseVisionFaceDetectorOptions highAccuracyOpts =
+                new FirebaseVisionFaceDetectorOptions.Builder()
+                        .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
+                        .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
+                        .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
                         .build();
-        objectDetector = FirebaseVision.getInstance().getOnDeviceObjectDetector(options);
+
+        detector = FirebaseVision.getInstance()
+                .getVisionFaceDetector(highAccuracyOpts);
+
+        labeler = FirebaseVision.getInstance()
+                .getOnDeviceImageLabeler();
 
         textureView = findViewById(R.id.texture_view);
 
@@ -326,15 +338,22 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void analyzeImage(FirebaseVisionImage image) {
-        objectDetector.processImage(image).addOnSuccessListener(detectedObjects -> {
-                    System.out.println("AMOUNT: "+detectedObjects.size());
-                    for (FirebaseVisionObject vObj : detectedObjects)
-                    System.out.println("AMOUNT TYPE:"+vObj.getClassificationCategory());
-            image.getBitmap().recycle();
-                        })
+        labeler.processImage(image).addOnSuccessListener(detectedObjects -> {
+            System.out.println("AMOUNT: " + detectedObjects.size());
+            for (FirebaseVisionImageLabel vImageLabel : detectedObjects) {
+                System.out.println("AMOUNT TYPE:" + vImageLabel.getText());
+            }
+            detector.detectInImage(image).addOnSuccessListener(detectedFaces -> {
+                System.out.println("AMOUNT EYE: "+detectedFaces.size());
+                for (FirebaseVisionFace vImageLabel : detectedFaces) {
+                    System.out.println("AMOUNT EYE OPEN:" + vImageLabel.getLeftEyeOpenProbability());
+                }
+                image.getBitmap().recycle();
+            });
+        })
                 .addOnFailureListener(e -> {
-                            // Task failed with an exception
-                            // ...
-                        });
+                    // Task failed with an exception
+                    // ...
+                });
     }
 }

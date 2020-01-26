@@ -13,7 +13,13 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="40dp" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="25dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="25dp"
-            android:id="@+id/cameraScrollView" app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="40dp"/>
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="40dp">
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/mainUserLayout">
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

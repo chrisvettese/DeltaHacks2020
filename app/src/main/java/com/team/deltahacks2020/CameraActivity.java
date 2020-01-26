@@ -314,6 +314,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void startTakingPictures() {
+        System.out.println("TEST123 " + pictureTimer);
         pictureTimer = new CountDownTimer(90000000, 200) {
 
             public void onTick(long millisUntilFinished) {
@@ -442,12 +443,6 @@ public class CameraActivity extends AppCompatActivity {
             lastImage.recycle();
         }
         lastImage = image.getBitmap();
-        //});
-        //})
-        //  .addOnFailureListener(e -> {
-        // Task failed with an exception
-        // ...
-        //    });
     }
 
     private void sendMotionAlert(boolean alertStatus) {

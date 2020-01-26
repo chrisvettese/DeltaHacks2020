@@ -51,10 +51,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CameraActivity extends AppCompatActivity {
     private boolean cameraIsOpen = false;
@@ -83,9 +80,29 @@ public class CameraActivity extends AppCompatActivity {
     private Bitmap lastImage;
 
     private boolean motionStatus;
+    private boolean humanStatus;
     private int motionPictureCount;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
+
+    private static final List<String> humanIdentifiers = new ArrayList<String>() {
+        {
+            add("Arm");
+            add("Shoulder");
+            add("Sitting");
+            add("Hand");
+            add("Wrist");
+            add("Muscle");
+            add("Finger");
+            add("Ear");
+            add("Standing");
+            add("Skin");
+            add("Nose");
+            add("Cheek");
+            add("Neck");
+            add("Eyelash");
+        }
+    };
 
     //for the log out method
     private GoogleSignInOptions gso;
@@ -113,6 +130,7 @@ public class CameraActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         cameraIsOpen = false;
         motionStatus = false;
+        humanStatus = false;
         motionPictureCount = 0;
 
 
@@ -317,8 +335,8 @@ public class CameraActivity extends AppCompatActivity {
         if (pictureTimer != null) {
             return;
         }
-        pictureTimer = new CountDownTimer(90000000, 200) {
-
+        pictureTimer = new CountDownTimer(9000000000000000000l, 200) {
+            @Override
             public void onTick(long millisUntilFinished) {
                 Bitmap bitmap = textureView.getBitmap().copy(textureView.getBitmap().getConfig(), false);
                 motionPictureCount++;
@@ -338,7 +356,7 @@ public class CameraActivity extends AppCompatActivity {
 
                 analyzeImage(firebaseImage);
             }
-
+            @Override
             public void onFinish() {
             }
         }.start();
@@ -427,9 +445,27 @@ public class CameraActivity extends AppCompatActivity {
             }
             if (motionPictureCount % 5 == 0) {
                 labeler.processImage(image).addOnSuccessListener(detectedImages -> {
-                    System.out.println("AMOUNT: " + detectedImages.size());
+                    int allConfidenceHumanCount = 0;
+                    int highConfidenceHumanCount = 0;
                     for (FirebaseVisionImageLabel vImageLabel : detectedImages) {
-                        System.out.println("AMOUNT TYPE:" + vImageLabel.getText());
+                        if (humanIdentifiers.contains(vImageLabel.getText())) {
+                            allConfidenceHumanCount++;
+                            if (vImageLabel.getConfidence() > 0.85f) {
+                                highConfidenceHumanCount++;
+                            }
+                        }
+                    }
+                    if (allConfidenceHumanCount >= 4 || highConfidenceHumanCount >= 2) {
+                        if (humanStatus == false) {
+                            humanStatus = true;
+                            sendHumanAlert(true);
+                        }
+                    }
+                    else if (allConfidenceHumanCount == 0) {
+                        if (humanStatus == true) {
+                            humanStatus = false;
+                            sendHumanAlert(false);
+                        }
                     }
                 });
             }
@@ -449,6 +485,15 @@ public class CameraActivity extends AppCompatActivity {
 
     private void sendMotionAlert(boolean alertStatus) {
         db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert", alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
+            if (task.isSuccessful()) {
+
+            } else {
+                System.out.println("ERROR: " + "Failed to update motionAlert");
+            }
+        });
+    }
+    private void sendHumanAlert(boolean alertStatus) {
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("humanAlert", alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
 
             } else {

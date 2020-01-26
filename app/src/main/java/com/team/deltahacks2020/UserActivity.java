@@ -96,7 +96,7 @@ public class UserActivity extends AppCompatActivity {
                     boolean status = (Boolean) motionStatus;
                     updateUIMotionStatus(status);
                 }
-                Object humanStatus = snapshot.get("motionAlert");
+                Object humanStatus = snapshot.get("humanAlert");
                 if (humanStatus != null) {
                     boolean status = (Boolean) humanStatus;
                     updateUIHumanStatus(status);

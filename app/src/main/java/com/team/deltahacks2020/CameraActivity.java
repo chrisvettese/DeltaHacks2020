@@ -112,24 +112,12 @@ public class CameraActivity extends AppCompatActivity {
                 .requestEmail()
                 .build();
 
+        auth = FirebaseAuth.getInstance();
         cameraKey = readFromFile();
-        try {
-            String fileName = auth.getCurrentUser().getEmail() + "_settings.txt";
-            FileOutputStream fileout = openFileOutput(fileName, MODE_PRIVATE);
-            OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
-            long time = System.currentTimeMillis();
-            cameraKey = Long.toString(time);
-            outputWriter.write(Long.toString(time));
-            outputWriter.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
         cameraIsOpen = false;
         motionStatus = false;
         humanStatus = false;
@@ -539,6 +527,19 @@ public class CameraActivity extends AppCompatActivity {
             }
         } catch (FileNotFoundException e) {
             System.out.println("login activity File not found: " + e.toString());
+            try {
+                String fileName = auth.getCurrentUser().getEmail() + "_settings.txt";
+                FileOutputStream fileout = openFileOutput(fileName, MODE_PRIVATE);
+                OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
+                long time = System.currentTimeMillis();
+                cameraKey = Long.toString(time);
+                ret = cameraKey;
+                outputWriter.write(Long.toString(time));
+                outputWriter.close();
+
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
         } catch (IOException e) {
             System.out.println("login activity Can not read file: " + e.toString());
         }

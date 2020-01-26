@@ -15,6 +15,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "337652328834-vloe76k7aqp5arh5ijjhskg7pt5i3p70.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.team.deltahacks2020",
+            "certificate_hash": "75dd73329c798fae61b5b6068cde218b01b397d5"
+          }
+        },
+        {
+          "client_id": "337652328834-tso18cdnunfpvs62civtabqr8nre9eec.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.team.deltahacks2020",
+            "certificate_hash": "e0507b34c349bcbcca6ffce554cec3c40c7c2791"
+          }
+        },
+        {
+          "client_id": "337652328834-bu9fah9vneavbor0khp0fbtku9ibeltm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.team.deltahacks2020",
+            "certificate_hash": "0d87e2277bc3eb3f40d16d50e3ffc3e1c13a57f5"
+          }
+        },
+        {
           "client_id": "337652328834-nrqb8ba4ldlcsfk1degb5bmb16h78nvu.apps.googleusercontent.com",
           "client_type": 3
         }

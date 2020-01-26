@@ -17,6 +17,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,13 +35,14 @@ public class SettingsActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-    String userID;
-    Button userButt;
-    Button camButt;
+    private String userID;
+    private Button userButt;
+    private Button camButt;
 
 
-    GoogleSignInClient mGoogleSignInClient;
-    Button signOut;
+    private GoogleSignInOptions gso;
+    private GoogleSignInClient mGoogleSignInClient;
+    private Button signOut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +52,11 @@ public class SettingsActivity extends AppCompatActivity {
         userButt = findViewById(R.id.userButton);
         camButt = findViewById(R.id.cameraButton);
 
-
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         //reads from a file the userID
         //userID = readFromFile();
@@ -60,11 +66,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         signOut = findViewById(R.id.btnSignOut);
         signOut.setOnClickListener(v -> {
-            switch (v.getId()) {
-                case R.id.btnSignOut:
-                    signOut();
-                    break;
-            }
+            signOut();
         });
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
         if (acct != null) {
@@ -193,23 +195,16 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-
-
-
-
     }
-
-
-
-
-
 
 
     private void signOut() {
         mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                Toast.makeText(SettingsActivity.this, "Signed out", Toast.LENGTH_SHORT);
+                Intent switchIntent = new Intent(SettingsActivity.this, MainActivity.class);
+                startActivity(switchIntent);
+                finish();
             }
         });
     }

@@ -419,7 +419,7 @@ public class CameraActivity extends AppCompatActivity {
         }
         int sum = rSum + gSum + bSum;
         //Motion detected!
-        if (sum > 1000000) {
+        if (sum > 800000) {
             System.out.println("AMOUNT MOTION TRUE");
             if (motionStatus == false) {
                 motionStatus = true;
@@ -432,12 +432,12 @@ public class CameraActivity extends AppCompatActivity {
                     for (FirebaseVisionImageLabel vImageLabel : detectedImages) {
                         if (humanIdentifiers.contains(vImageLabel.getText())) {
                             allConfidenceHumanCount++;
-                            if (vImageLabel.getConfidence() > 0.85f) {
+                            if (vImageLabel.getConfidence() > 0.80f) {
                                 highConfidenceHumanCount++;
                             }
                         }
                     }
-                    if (allConfidenceHumanCount >= 4 || highConfidenceHumanCount >= 2) {
+                    if (allConfidenceHumanCount >= 3 || highConfidenceHumanCount >= 2) {
                         if (humanStatus == false) {
                             humanStatus = true;
                             sendHumanAlert(true);

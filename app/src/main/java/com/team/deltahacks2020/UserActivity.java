@@ -3,6 +3,7 @@ package com.team.deltahacks2020;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -145,6 +146,7 @@ public class UserActivity extends AppCompatActivity {
 
         TextView text = new TextView(this);
         text.setText("Camera-" + cameraId);
+        text.setTypeface(null, Typeface.BOLD);
         cameraLayout.addView(text);
 
         LinearLayout horizontalLayoutHuman = new LinearLayout(this);

@@ -437,7 +437,7 @@ public class CameraActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    if (allConfidenceHumanCount >= 3 || highConfidenceHumanCount >= 2) {
+                    if (allConfidenceHumanCount >= 2 /*|| highConfidenceHumanCount >= 2*/) {
                         if (humanStatus == false) {
                             humanStatus = true;
                             sendHumanAlert(true);

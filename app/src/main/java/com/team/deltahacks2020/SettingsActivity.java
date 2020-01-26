@@ -193,17 +193,15 @@ public class SettingsActivity extends AppCompatActivity {
                 });
 
 
+
     }
 
 
     private void signOut() {
-        mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Intent switchIntent = new Intent(SettingsActivity.this, MainActivity.class);
-                startActivity(switchIntent);
-                finish();
-            }
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
+            Intent switchIntent = new Intent(SettingsActivity.this, MainActivity.class);
+            startActivity(switchIntent);
+            finish();
         });
     }
 }

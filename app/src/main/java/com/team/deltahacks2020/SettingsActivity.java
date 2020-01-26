@@ -5,8 +5,19 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +38,9 @@ public class SettingsActivity extends AppCompatActivity {
     Button camButt;
 
 
+    GoogleSignInClient mGoogleSignInClient;
+    Button signOut;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,11 +54,25 @@ public class SettingsActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        signOut = findViewById(R.id.btnSignOut);
+        signOut.setOnClickListener(v -> {
+            switch (v.getId()) {
+                case R.id.btnSignOut:
+                    signOut();
+                    break;
+            }
+        });
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        if (acct != null) {
+            String personName = acct.getDisplayName();
+        }
+
+        //db.collection("controller").document("boogus@gmail.com").get()
         db.collection("controller").document(auth.getCurrentUser().getEmail()).get()
                 .addOnCompleteListener((@Nonnull Task<DocumentSnapshot> task)-> {
                     if(!task.isSuccessful()){
                         //ask if user or camera
-
                         camButt.setVisibility(View.VISIBLE);
                         userButt.setVisibility(View.VISIBLE);
                     }
@@ -62,22 +90,6 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }*/
                 });
-
-        long time = System.currentTimeMillis();
-        try {
-            FileOutputStream fileout=openFileOutput("mytextfile.txt", MODE_PRIVATE);
-            OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
-            //outputWriter.write(textmsg.getText().toString());
-            outputWriter.write(Long.toString(time));
-            outputWriter.close();
-
-            //display file saved message
-            Toast.makeText(getBaseContext(), "File saved successfully!",
-                    Toast.LENGTH_SHORT).show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 
@@ -123,12 +135,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         //save id to internal Storage
         //File file = new File("controller.txt");
-        /*
+
 
         try {
             FileOutputStream fileout=openFileOutput("mytextfile.txt", MODE_PRIVATE);
             OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
-            //outputWriter.write(textmsg.getText().toString());
             outputWriter.write(Long.toString(time));
             outputWriter.close();
 
@@ -138,11 +149,46 @@ public class SettingsActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
+
+        try {
+            FileInputStream fileIn=openFileInput("mytextfile.txt");
+            InputStreamReader InputRead= new InputStreamReader(fileIn);
+
+            char[] inputBuffer= new char[100];
+            String s="";
+            int charRead;
+
+            while ((charRead=InputRead.read(inputBuffer))>0) {
+                // char to string conversion
+                String readstring=String.copyValueOf(inputBuffer,0,charRead);
+                s +=readstring;
+            }
+            InputRead.close();
+
+            Toast.makeText(getBaseContext(), "File retrieved successfully!",
+                    Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
 
     }
 
 
+
+
+
+
+
+    private void signOut() {
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Toast.makeText(SettingsActivity.this, "Signed out", Toast.LENGTH_SHORT);
+            }
+        });
+    }
 }
+

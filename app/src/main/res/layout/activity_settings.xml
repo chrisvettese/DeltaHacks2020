@@ -21,4 +21,11 @@
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.498"
             android:visibility="invisible" android:onClick="userClick" app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="288dp"/>
+    <Button
+            android:text="log out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnSignOut" app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="84dp" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

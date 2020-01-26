@@ -335,8 +335,8 @@ public class CameraActivity extends AppCompatActivity {
         if (pictureTimer != null) {
             return;
         }
-        pictureTimer = new CountDownTimer(90000000, 200) {
-
+        pictureTimer = new CountDownTimer(9000000000000000000l, 200) {
+            @Override
             public void onTick(long millisUntilFinished) {
                 Bitmap bitmap = textureView.getBitmap().copy(textureView.getBitmap().getConfig(), false);
                 motionPictureCount++;
@@ -356,7 +356,7 @@ public class CameraActivity extends AppCompatActivity {
 
                 analyzeImage(firebaseImage);
             }
-
+            @Override
             public void onFinish() {
             }
         }.start();

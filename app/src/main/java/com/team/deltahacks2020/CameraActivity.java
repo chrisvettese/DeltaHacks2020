@@ -78,6 +78,7 @@ public class CameraActivity extends AppCompatActivity {
     private Bitmap lastImage;
 
     private boolean motionStatus;
+    private int motionPictureCount;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
@@ -97,6 +98,7 @@ public class CameraActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         cameraIsOpen = false;
         motionStatus = false;
+        motionPictureCount = 0;
 
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
@@ -119,8 +121,7 @@ public class CameraActivity extends AppCompatActivity {
         detector = FirebaseVision.getInstance()
                 .getVisionFaceDetector(realTimeOpts);
 
-        labeler = FirebaseVision.getInstance()
-                .getOnDeviceImageLabeler();
+        labeler = FirebaseVision.getInstance().getCloudImageLabeler();
 
         textureView = findViewById(R.id.texture_view);
 
@@ -302,7 +303,7 @@ public class CameraActivity extends AppCompatActivity {
 
             public void onTick(long millisUntilFinished) {
                 Bitmap bitmap = textureView.getBitmap().copy(textureView.getBitmap().getConfig(), false);
-
+                motionPictureCount++;
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byte[] byteArray = stream.toByteArray();
@@ -401,17 +402,26 @@ public class CameraActivity extends AppCompatActivity {
         int sum = rSum + gSum + bSum;
         //Motion detected!
         if (sum > 1000000) {
+            System.out.println("AMOUNT MOTION TRUE");
             if (motionStatus == false) {
                 motionStatus = true;
                 sendMotionAlert(true);
             }
+            if (motionPictureCount % 5 == 0) {
+                labeler.processImage(image).addOnSuccessListener(detectedImages -> {
+                    System.out.println("AMOUNT: " + detectedImages.size());
+                    for (FirebaseVisionImageLabel vImageLabel : detectedImages) {
+                        System.out.println("AMOUNT TYPE:" + vImageLabel.getText());
+                    }
+                });
+            }
         } else {
+            System.out.println("AMOUNT MOTION FALSE");
             if (motionStatus == true) {
                 motionStatus = false;
                 sendMotionAlert(false);
             }
         }
-        System.out.println("AMOUNT MOTION " + (sum > 1000000));
 
         if (!lastImage.isRecycled()) {
             lastImage.recycle();

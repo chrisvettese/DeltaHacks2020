@@ -114,7 +114,7 @@ public class SettingsActivity extends AppCompatActivity {
                             Toast.makeText(getBaseContext(), s + " umm yay?",
                                     Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
-                            Intent intent = new Intent(this, UserActivity.class);
+                            Intent intent = new Intent(this, CameraActivity.class);
                             startActivity(intent);
                             finish();
                         }

@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CameraActivity extends AppCompatActivity {
+    private boolean cameraIsOpen = false;
     private CameraManager cameraManager;
     private int cameraFacing;
     private TextureView.SurfaceTextureListener surfaceTextureListener;
@@ -76,6 +77,8 @@ public class CameraActivity extends AppCompatActivity {
 
     private Bitmap lastImage;
 
+    private boolean motionStatus;
+
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
     static {
@@ -92,6 +95,9 @@ public class CameraActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
+        cameraIsOpen = false;
+        motionStatus = false;
+
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
 
@@ -144,18 +150,23 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onOpened(CameraDevice cameraDevice) {
                 CameraActivity.this.cameraDevice = cameraDevice;
-                createPreviewSession();
+                if (!cameraIsOpen) {
+                    cameraIsOpen = true;
+                    createPreviewSession();
+                }
             }
 
             @Override
             public void onDisconnected(CameraDevice cameraDevice) {
                 cameraDevice.close();
+                cameraIsOpen = false;
                 CameraActivity.this.cameraDevice = null;
             }
 
             @Override
             public void onError(CameraDevice cameraDevice, int error) {
                 cameraDevice.close();
+                cameraIsOpen = false;
                 CameraActivity.this.cameraDevice = null;
             }
         };
@@ -287,7 +298,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void startTakingPictures() {
-        pictureTimer = new CountDownTimer(3000000, 200) {
+        pictureTimer = new CountDownTimer(90000000, 200) {
 
             public void onTick(long millisUntilFinished) {
                 Bitmap bitmap = textureView.getBitmap().copy(textureView.getBitmap().getConfig(), false);
@@ -390,7 +401,15 @@ public class CameraActivity extends AppCompatActivity {
         int sum = rSum + gSum + bSum;
         //Motion detected!
         if (sum > 1000000) {
-            sendMotionAlert();
+            if (motionStatus == false) {
+                motionStatus = true;
+                sendMotionAlert(true);
+            }
+        } else {
+            if (motionStatus == true) {
+                motionStatus = false;
+                sendMotionAlert(false);
+            }
         }
         System.out.println("AMOUNT MOTION " + (sum > 1000000));
 
@@ -406,8 +425,8 @@ public class CameraActivity extends AppCompatActivity {
         //    });
     }
 
-    private void sendMotionAlert() {
-        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert", System.currentTimeMillis()).addOnCompleteListener((@NonNull Task<Void> task)->{
+    private void sendMotionAlert(boolean alertStatus) {
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert", alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
 
             } else {

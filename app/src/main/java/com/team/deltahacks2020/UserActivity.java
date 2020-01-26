@@ -32,10 +32,17 @@ public class UserActivity extends AppCompatActivity {
             }
 
             if (snapshot != null && snapshot.exists()) {
-                System.out.println("TEST " + snapshot.getData());
+                Object motionStatus = snapshot.get("motionAlert");
+                if (motionStatus != null) {
+                    boolean status = (Boolean) motionStatus;
+                    updateUIMotionStatus(status);
+                }
             } else {
                 System.out.println("TEST : null");
             }
         });
+    }
+    private void updateUIMotionStatus(boolean isMotion) {
+        
     }
 }

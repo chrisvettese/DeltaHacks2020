@@ -426,7 +426,7 @@ public class CameraActivity extends AppCompatActivity {
                 motionStatus = true;
                 sendMotionAlert(true);
             //}
-            if (motionPictureCount % 5 == 0) {
+            if (/*motionPictureCount % 5 == 0*/ true) {
                 labeler.processImage(image).addOnSuccessListener(detectedImages -> {
                     int allConfidenceHumanCount = 0;
                     int highConfidenceHumanCount = 0;

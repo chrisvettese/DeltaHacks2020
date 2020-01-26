@@ -81,21 +81,40 @@ public class SettingsActivity extends AppCompatActivity {
                         camButt.setVisibility(View.VISIBLE);
                         userButt.setVisibility(View.VISIBLE);
                     } else{
-                        System.out.println("TEST123");
-                    }
-                    /*
-                    else{
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()){
-                            String phoneID = task.getResult().get("userID").toString();
-                            //this means the phone is user
-                            if(userID == phoneID){
+                        String fileName = auth.getCurrentUser().getEmail() + ".txt";
+
+
+                        try {
+                            FileInputStream fileIn=openFileInput(fileName);
+                            InputStreamReader InputRead= new InputStreamReader(fileIn);
+
+                            char[] inputBuffer= new char[100];
+                            String s="";
+                            int charRead;
+
+                            while ((charRead=InputRead.read(inputBuffer))>0) {
+                                // char to string conversion
+                                String readstring=String.copyValueOf(inputBuffer,0,charRead);
+                                s +=readstring;
                             }
-                            //this means the phone is a camera
-                            else{
-                            }
+                            InputRead.close();
+                            //if s matches firebase than go to user intent
+                            //else go to camera
+
+
+
+
+                            Toast.makeText(getBaseContext(), s + " umm yay?",
+                                    Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            Toast.makeText(getBaseContext(), "Arghhhhh",
+                                    Toast.LENGTH_SHORT).show();
                         }
-                    }*/
+
+
+
+
+                    }
                 });
     }
 
@@ -141,7 +160,9 @@ public class SettingsActivity extends AppCompatActivity {
         db.collection("controller").document(auth.getCurrentUser().getEmail()).set(idMap)
                 .addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
+
                 String fileName = auth.getCurrentUser().getEmail() + ".txt";
+
                 try {
                     FileOutputStream fileout=openFileOutput(fileName, MODE_PRIVATE);
                     OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
@@ -157,34 +178,6 @@ public class SettingsActivity extends AppCompatActivity {
                     Toast.makeText(getBaseContext(), "Ooga :(",
                             Toast.LENGTH_SHORT).show();
                 }
-
-                //todo delete this yeet
-                try {
-                    FileInputStream fileIn=openFileInput(fileName);
-                    InputStreamReader InputRead= new InputStreamReader(fileIn);
-
-                    char[] inputBuffer= new char[100];
-                    String s="";
-                    int charRead;
-
-                    while ((charRead=InputRead.read(inputBuffer))>0) {
-                        // char to string conversion
-                        String readstring=String.copyValueOf(inputBuffer,0,charRead);
-                        s +=readstring;
-                    }
-                    InputRead.close();
-
-                    Toast.makeText(getBaseContext(), "yay2",
-                            Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    Toast.makeText(getBaseContext(), "Arghhhhh",
-                            Toast.LENGTH_SHORT).show();
-                }
-
-
-
-
-
 
             } else {
                 Toast.makeText(getBaseContext(), "Blehhhh",Toast.LENGTH_SHORT).show();

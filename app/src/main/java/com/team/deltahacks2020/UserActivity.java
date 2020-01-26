@@ -2,6 +2,7 @@ package com.team.deltahacks2020;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,9 @@ public class UserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
+
+        ImageView myImageView = findViewById(R.id.redCircle);
+        myImageView.setImageResource(R.drawable.redcircle);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();

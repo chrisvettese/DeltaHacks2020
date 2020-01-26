@@ -15,7 +15,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.*;
 
 public class MainActivity extends AppCompatActivity {
-    public static long cameraId = System.currentTimeMillis();
 
     GoogleSignInOptions gso;
     GoogleSignInClient mGoogleSignInClient;
@@ -33,14 +32,11 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         signIn = findViewById(R.id.sign_in_button);
 
-        signIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.sign_in_button:
-                        signIn();
-                        break;
-                }
+        signIn.setOnClickListener(v -> {
+            switch (v.getId()) {
+                case R.id.sign_in_button:
+                    signIn();
+                    break;
             }
         });
         

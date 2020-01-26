@@ -127,33 +127,6 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    private String readFromFile() {
-        String ret = "";
-        try {
-            InputStream inputStream = openFileInput("settings.txt");
-
-            if (inputStream != null) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ((receiveString = bufferedReader.readLine()) != null) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("login activity File not found: " + e.toString());
-        } catch (IOException e) {
-            System.out.println("login activity Can not read file: " + e.toString());
-        }
-
-        return ret;
-    }
-
     public void cameraClick(View view) {
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);

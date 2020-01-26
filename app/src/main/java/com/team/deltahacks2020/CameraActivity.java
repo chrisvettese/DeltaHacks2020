@@ -34,6 +34,8 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
+
+import java.io.*;
 import java.util.*;
 
 public class CameraActivity extends AppCompatActivity {
@@ -56,6 +58,8 @@ public class CameraActivity extends AppCompatActivity {
 
     private FirebaseVisionImageLabeler labeler;
     private FirebaseVisionFaceDetector detector;
+
+    private String cameraKey;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -107,6 +111,21 @@ public class CameraActivity extends AppCompatActivity {
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
+
+        cameraKey = readFromFile();
+        try {
+            String fileName = auth.getCurrentUser().getEmail() + "_settings.txt";
+            FileOutputStream fileout = openFileOutput(fileName, MODE_PRIVATE);
+            OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
+            long time = System.currentTimeMillis();
+            cameraKey = Long.toString(time);
+            outputWriter.write(Long.toString(time));
+            outputWriter.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         db = FirebaseFirestore.getInstance();
@@ -467,7 +486,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void sendMotionAlert(boolean alertStatus) {
-        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert-" + MainActivity.cameraId, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert-" + cameraKey, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
 
             } else {
@@ -482,7 +501,7 @@ public class CameraActivity extends AppCompatActivity {
         });
     }
     private void sendHumanAlert(boolean alertStatus) {
-        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("humanAlert-" + MainActivity.cameraId, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("humanAlert-" + cameraKey, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
 
             } else {
@@ -495,8 +514,35 @@ public class CameraActivity extends AppCompatActivity {
     public void logOutClick(View view){
         mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
             Intent switchIntent = new Intent(this, MainActivity.class);
+            closeCamera();
             startActivity(switchIntent);
             finish();
         });
+    }
+    private String readFromFile() {
+        String ret = "";
+        try {
+            String fileName = auth.getCurrentUser().getEmail() + "_settings.txt";
+            InputStream inputStream = openFileInput(fileName);
+            if (inputStream != null) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ((receiveString = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("login activity File not found: " + e.toString());
+        } catch (IOException e) {
+            System.out.println("login activity Can not read file: " + e.toString());
+        }
+
+        return ret;
     }
 }

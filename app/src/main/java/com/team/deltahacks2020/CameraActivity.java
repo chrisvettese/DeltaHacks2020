@@ -475,6 +475,7 @@ public class CameraActivity extends AppCompatActivity {
 
             } else {
                 System.out.println("ERROR: " + "Failed to update motionAlert");
+                task.getException().printStackTrace();
             }
         });
     }
@@ -484,6 +485,7 @@ public class CameraActivity extends AppCompatActivity {
 
             } else {
                 System.out.println("ERROR: " + "Failed to update motionAlert");
+                task.getException().printStackTrace();
             }
         });
     }

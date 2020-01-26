@@ -4,10 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.ImageFormat;
-import android.graphics.SurfaceTexture;
+import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.camera2.*;
@@ -32,8 +29,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
+import com.google.firebase.ml.vision.face.FirebaseVisionFace;
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
+import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
+import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetector;
+import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -41,6 +44,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class CameraActivity extends AppCompatActivity {
     private CameraManager cameraManager;
@@ -58,7 +62,11 @@ public class CameraActivity extends AppCompatActivity {
     private CameraCaptureSession cameraCaptureSession;
     private TextureView textureView;
     private CountDownTimer pictureTimer;
-    private FirebaseVisionObjectDetector objectDetector;
+
+    private FirebaseVisionImageLabeler labeler;
+    private FirebaseVisionFaceDetector detector;
+
+    private Bitmap lastImage;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
@@ -79,7 +87,23 @@ public class CameraActivity extends AppCompatActivity {
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         cameraFacing = CameraCharacteristics.LENS_FACING_BACK;
 
-        objectDetector = FirebaseVision.getInstance().getOnDeviceObjectDetector();
+        /*FirebaseVisionFaceDetectorOptions highAccuracyOpts =
+                new FirebaseVisionFaceDetectorOptions.Builder()
+                        .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
+                        .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
+                        .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
+                        .build();*/
+
+        FirebaseVisionFaceDetectorOptions realTimeOpts =
+                new FirebaseVisionFaceDetectorOptions.Builder()
+                        .setContourMode(FirebaseVisionFaceDetectorOptions.ALL_CONTOURS)
+                        .build();
+
+        detector = FirebaseVision.getInstance()
+                .getVisionFaceDetector(realTimeOpts);
+
+        labeler = FirebaseVision.getInstance()
+                .getOnDeviceImageLabeler();
 
         textureView = findViewById(R.id.texture_view);
 
@@ -209,11 +233,10 @@ public class CameraActivity extends AppCompatActivity {
             Surface previewSurface = new Surface(surfaceTexture);
             ImageReader reader = ImageReader.newInstance(previewSize.getWidth(), previewSize.getHeight(), ImageFormat.JPEG, 1);
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            //captureRequestBuilder.addTarget(previewSurface);
-            captureRequestBuilder.addTarget(reader.getSurface());
+            captureRequestBuilder.addTarget(previewSurface);
+            //captureRequestBuilder.addTarget(reader.getSurface());
             captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-            int rotation = getWindowManager().getDefaultDisplay().getRotation();
-            captureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
+
 
             ImageReader.OnImageAvailableListener readerListener = reader1 -> {
                 try (Image image = reader1.acquireLatestImage()) {
@@ -253,14 +276,14 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void startTakingPictures() {
-        pictureTimer = new CountDownTimer(3000000, 1000) {
+        pictureTimer = new CountDownTimer(3000000, 200) {
 
             public void onTick(long millisUntilFinished) {
-                Bitmap bitmap = textureView.getBitmap();
+                Bitmap bitmap = textureView.getBitmap().copy(textureView.getBitmap().getConfig(), false);
+
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byte[] byteArray = stream.toByteArray();
-                bitmap.recycle();
 
                 FirebaseVisionImageMetadata metadata = new FirebaseVisionImageMetadata.Builder()
                         .setWidth(bitmap.getWidth())   // 480x360 is typically sufficient for
@@ -269,8 +292,10 @@ public class CameraActivity extends AppCompatActivity {
                         .setRotation(getRotationCompensation(cameraId, CameraActivity.this, CameraActivity.this))
                         .build();
 
-                FirebaseVisionImage firebaseImage = FirebaseVisionImage.fromByteArray(byteArray, metadata);
-                //analyzeImage(firebaseImage);
+                //FirebaseVisionImage firebaseImage = FirebaseVisionImage.fromByteArray(byteArray, metadata);
+                FirebaseVisionImage firebaseImage = FirebaseVisionImage.fromBitmap(bitmap);
+
+                analyzeImage(firebaseImage);
             }
 
             public void onFinish() {
@@ -322,15 +347,54 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void analyzeImage(FirebaseVisionImage image) {
-        objectDetector.processImage(image)
-                .addOnSuccessListener(detectedObjects -> {
-                    System.out.println("AMOUNT: "+detectedObjects.size());
-                            // Task completed successfully
-                            // ...
-                        })
-                .addOnFailureListener(e -> {
-                            // Task failed with an exception
-                            // ...
-                        });
+        /*labeler.processImage(image).addOnSuccessListener(detectedImages -> {
+            detector.detectInImage(image).addOnSuccessListener(detectedFaces -> {
+                System.out.println("AMOUNT: " + detectedImages.size());
+                for (FirebaseVisionImageLabel vImageLabel : detectedImages) {
+                    System.out.println("AMOUNT TYPE:" + vImageLabel.getText());
+                }
+                System.out.println("AMOUNT EYE: "+detectedFaces.size());
+                for (FirebaseVisionFace vImageLabel : detectedFaces) {
+                    System.out.println("AMOUNT TRACK:" + vImageLabel.getTrackingId());
+                }*/
+                if (lastImage == null) {
+                    lastImage = image.getBitmap();
+                }
+                if (lastImage.isRecycled()) {
+                    lastImage = image.getBitmap();
+                    return;
+
+                }
+                int rSum = 0, gSum = 0, bSum = 0;
+
+                for (int i = 0; i < lastImage.getWidth(); i+=10) {
+                    for (int j = 0; j < lastImage.getHeight(); j+=10) {
+                        int lastPixel = lastImage.getPixel(i, j);
+                        int thisPixel = image.getBitmap().getPixel(i, j);
+                        rSum += Math.abs(Color.red(thisPixel) - Color.red(lastPixel));
+                        gSum += Math.abs(Color.green(thisPixel) - Color.green(lastPixel));
+                        bSum += Math.abs(Color.blue(thisPixel) - Color.blue(lastPixel));
+                    }
+                }
+                int sum = rSum + gSum + bSum;
+                //Motion detected!
+                if (sum > 1000000) {
+                    sendMotionAlert();
+                }
+                System.out.println("AMOUNT MOTION " + (sum > 1000000));
+
+                if (!lastImage.isRecycled()) {
+                    lastImage.recycle();
+                }
+                lastImage = image.getBitmap();
+            //});
+        //})
+              //  .addOnFailureListener(e -> {
+                    // Task failed with an exception
+                    // ...
+            //    });
+    }
+    private void sendMotionAlert() {
+
     }
 }

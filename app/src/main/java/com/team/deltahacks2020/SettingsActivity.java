@@ -36,7 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-    private String userID;
+    private long userID;
     private Button userButt;
     private Button camButt;
 
@@ -87,22 +87,24 @@ public class SettingsActivity extends AppCompatActivity {
 
                         try {
                             FileInputStream fileIn = openFileInput(fileName);
-                            InputStreamReader InputRead = new InputStreamReader(fileIn);
+                            InputStreamReader inputRead = new InputStreamReader(fileIn);
 
                             char[] inputBuffer = new char[100];
                             String s = "";
                             int charRead;
 
-                            while ((charRead = InputRead.read(inputBuffer)) > 0) {
+                            while ((charRead = inputRead.read(inputBuffer)) > 0) {
                                 // char to string conversion
                                 String readstring = String.copyValueOf(inputBuffer, 0, charRead);
                                 s += readstring;
                             }
-                            InputRead.close();
+                            inputRead.close();
+                            userID = Long.parseLong(s);
                             //if s matches firebase than go to user intent
                             //else go to camera
                             if (s.equals(task.getResult().get("userID").toString())) {
                                 Intent intent = new Intent(this, UserActivity.class);
+                                intent.putExtra("userID", userID);
                                 startActivity(intent);
                                 finish();
                             } else {
@@ -180,6 +182,7 @@ public class SettingsActivity extends AppCompatActivity {
                             //Toast.makeText(getBaseContext(), "File saved successfully!",Toast.LENGTH_SHORT).show();
 
                             Intent switchActivity = new Intent(SettingsActivity.this, UserActivity.class);
+                            switchActivity.putExtra("userID", userID);
                             startActivity(switchActivity);
                             finish();
 

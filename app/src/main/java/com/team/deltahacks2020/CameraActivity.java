@@ -65,6 +65,8 @@ public class CameraActivity extends AppCompatActivity {
     private boolean humanStatus;
     private int motionPictureCount;
 
+    private long cameraKey;
+
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
     private static final List<String> humanIdentifiers = new ArrayList<String>() {
@@ -100,8 +102,8 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_camera);
+
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -114,6 +116,8 @@ public class CameraActivity extends AppCompatActivity {
         motionStatus = false;
         humanStatus = false;
         motionPictureCount = 0;
+
+        cameraKey = System.currentTimeMillis();
 
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
@@ -466,7 +470,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void sendMotionAlert(boolean alertStatus) {
-        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert", alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert-" + cameraKey, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
 
             } else {
@@ -475,7 +479,7 @@ public class CameraActivity extends AppCompatActivity {
         });
     }
     private void sendHumanAlert(boolean alertStatus) {
-        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("humanAlert", alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("humanAlert-" + cameraKey, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
 
             } else {

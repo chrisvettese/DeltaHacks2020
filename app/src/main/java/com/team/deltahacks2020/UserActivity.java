@@ -1,56 +1,91 @@
 package com.team.deltahacks2020;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserActivity extends AppCompatActivity {
     //for the log out method
     private GoogleSignInOptions gso;
     private GoogleSignInClient mGoogleSignInClient;
 
-    private TextView humanTimeText;
-    private TextView motionTimeText;
-    private TextView humanSensedText;
-    private TextView motionSensedText;
-    private ImageView redImgViewMotion;
-    private ImageView greenImgViewMotion;
-    private ImageView redImgViewHuman;
-    private ImageView greenImgViewHuman;
-    private boolean countHuman;
-    private boolean countMotion;
-    private int timeHuman;
-    private int timeMotion;
+    private Bitmap greenCircle, redCircle;
+
+    private long userID;
+
     private CountDownTimer timer;
+
+    private Map<String, Object> mapFromFirebase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
+        userID = savedInstanceState.getLong("userID");
 
-        countHuman = true;
-        countMotion = true;
+        mapFromFirebase = new HashMap<>();
+
+        greenCircle = BitmapFactory.decodeResource(getResources(), R.drawable.greencircle);
+        redCircle = BitmapFactory.decodeResource(getResources(), R.drawable.redcircle);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        String email = auth.getCurrentUser().getEmail();
+
+        Map<String, Object> firebaseDBUpdate = new HashMap<>();
+        firebaseDBUpdate.put("userID", userID);
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).set(firebaseDBUpdate).addOnCompleteListener((@NonNull Task<Void> task)->{
+            if (task.isSuccessful()) {
+
+            } else {
+                System.out.println("ERROR: " + "Failed to clean database.");
+            }
+        });
 
         timer = new CountDownTimer(9000000000000000000l, 1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
-                if (countHuman) {
-                    timeHuman++;
-                    humanTimeText.setText("Last human seen: " + timeHuman + " seconds ago");
-                }
-                if (countMotion) {
-                    timeMotion++;
-                    motionTimeText.setText("Last movement detected: " + timeMotion + " seconds ago");
+                ScrollView view = findViewById(R.id.cameraScrollView);
+                for (int i = 0; i < view.getChildCount(); i++) {
+                    LinearLayout verticalMainLayout = (LinearLayout) view.getChildAt(i);
+                    LinearLayout humanLayout = (LinearLayout) verticalMainLayout.getChildAt(1);
+                    LinearLayout motionLayout = (LinearLayout) verticalMainLayout.getChildAt(2);
+
+                    TextView humanTime = (TextView) verticalMainLayout.getChildAt(3);
+                    TextView motionTime = (TextView) verticalMainLayout.getChildAt(4);
+                    TextView humanStatus = (TextView) humanLayout.getChildAt(1);
+                    TextView motionStatus = (TextView) motionLayout.getChildAt(1);
+
+                    boolean countHuman = humanStatus.getText().toString().equals("No Humans Detected");
+                    boolean countMotion = motionStatus.getText().toString().equals("No Motion Detected");
+
+                    if (countHuman) {
+                        int currentTime = Integer.parseInt(humanTime.getText().toString().replaceAll("\\D+",""));
+                        humanTime.setText("Last human seen: " + (currentTime + 1) + "seconds ago");
+                    }
+                    if (countMotion) {
+                        int currentTime = Integer.parseInt(motionTime.getText().toString().replaceAll("\\D+",""));
+                        motionTime.setText("Last movement detected: " + (currentTime + 1) + "seconds ago");
+                    }
                 }
             }
 
@@ -59,8 +94,6 @@ public class UserActivity extends AppCompatActivity {
 
             }
         }.start();
-        timeHuman = 0;
-        timeMotion = 0;
 
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -69,44 +102,78 @@ public class UserActivity extends AppCompatActivity {
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        redImgViewMotion = findViewById(R.id.redCircleMotion);
-        greenImgViewMotion = findViewById(R.id.greenCircleMotion);
-        redImgViewHuman = findViewById(R.id.redCircleHuman);
-        greenImgViewHuman = findViewById(R.id.greenCircleHuman);
-
-        humanTimeText = findViewById(R.id.humanTV);
-        motionTimeText = findViewById(R.id.motionTime);
-
-        humanSensedText = findViewById(R.id.humansSensed);
-        motionSensedText = findViewById(R.id.motionSensed);
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-
         final DocumentReference docRef = db.collection("controller").document(email);
         docRef.addSnapshotListener((snapshot, e) -> {
             if (e != null) {
                 System.out.println("Listen failed");
                 return;
             }
-
             if (snapshot != null && snapshot.exists()) {
-                Object motionStatus = snapshot.get("motionAlert");
-                if (motionStatus != null) {
-                    boolean status = (Boolean) motionStatus;
-                    updateUIMotionStatus(status);
-                }
-                Object humanStatus = snapshot.get("humanAlert");
-                if (humanStatus != null) {
-                    boolean status = (Boolean) humanStatus;
-                    updateUIHumanStatus(status);
+                for (String key : snapshot.getData().keySet()) {
+                    if (!key.equals("userID")) {
+                        Object value = snapshot.get(key);
+                        //If this is the key-value pair being updated on firebase
+                        Object oldValueFromFirebase = mapFromFirebase.get(key);
+                        if (!value.equals(oldValueFromFirebase)) {
+                            mapFromFirebase.put(key, value);
+                            String[] splitKey = key.split("-");
+                            if (oldValueFromFirebase == null) {
+                                addToScrollView(splitKey[1]);
+                            }
+                            //If this is an update to human movement
+                            if (key.contains("humanAlert")) {
+                                updateUIHumanStatus((Boolean) value, "Camera-" + splitKey[1]);
+                                //this is an update to motion sensor
+                            } else {
+                                updateUIMotionStatus((Boolean) value, "Camera-" + splitKey[1]);
+                            }
+                        }
+                    }
                 }
             } else {
                 System.out.println("TEST : null");
             }
         });
     }
+    private void addToScrollView(String cameraId) {
+        LinearLayout cameraLayout = new LinearLayout(this);
+        cameraLayout.setOrientation(LinearLayout.VERTICAL);
 
+        TextView text = new TextView(this);
+        text.setText("Camera-" + cameraId);
+        cameraLayout.addView(text);
+
+        LinearLayout horizontalLayoutHuman = new LinearLayout(this);
+        horizontalLayoutHuman.setOrientation(LinearLayout.HORIZONTAL);
+        ImageView humanCircle = new ImageView(this);
+        humanCircle.setImageBitmap(greenCircle);
+        TextView humanStateText = new TextView(this);
+        humanStateText.setText("No Humans Detected");
+        horizontalLayoutHuman.addView(humanCircle);
+        horizontalLayoutHuman.addView(humanStateText);
+        cameraLayout.addView(horizontalLayoutHuman);
+
+        LinearLayout horizontalLayoutMotion = new LinearLayout(this);
+        horizontalLayoutHuman.setOrientation(LinearLayout.HORIZONTAL);
+        ImageView motionCircle = new ImageView(this);
+        motionCircle.setImageBitmap(greenCircle);
+        TextView motionStateText = new TextView(this);
+        motionStateText.setText("No Motion Detected");
+        horizontalLayoutMotion.addView(motionCircle);
+        horizontalLayoutMotion.addView(motionStateText);
+        cameraLayout.addView(horizontalLayoutMotion);
+
+        TextView humanUpdateText = new TextView(this);
+        humanUpdateText.setText("Last human seen: 0 seconds ago");
+        cameraLayout.addView(humanUpdateText);
+
+        TextView motionUpdateText = new TextView(this);
+        motionUpdateText.setText("Last movement seen: 0 seconds ago");
+        cameraLayout.addView(motionUpdateText);
+
+        ScrollView scrollView = findViewById(R.id.cameraScrollView);
+        scrollView.addView(cameraLayout);
+    }
 
     public void logOutClick(View view) {
         mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
@@ -121,41 +188,55 @@ public class UserActivity extends AppCompatActivity {
         timer.cancel();
     }
 
-    private void updateUIMotionStatus(boolean isMotion) {
+    private void updateUIMotionStatus(boolean isMotion, String cameraId) {
+        ScrollView scrollView = findViewById(R.id.cameraScrollView);
+        LinearLayout verticalMainLayout = null;
+        for (int i = 0; i < scrollView.getChildCount(); i++) {
+            LinearLayout layout = (LinearLayout) scrollView.getChildAt(i);
+            if (((TextView) layout.getChildAt(0)).getText().toString().equals(cameraId)) {
+                verticalMainLayout = layout;
+            }
+        }
+        LinearLayout motionLayout = (LinearLayout) verticalMainLayout.getChildAt(2);
+        ImageView circle = (ImageView) motionLayout.getChildAt(0);
+
+        TextView motionTime = (TextView) verticalMainLayout.getChildAt(4);
+        TextView motionStatus = (TextView) motionLayout.getChildAt(1);
 
         if (isMotion == true) {
-            countMotion = false;
-            redImgViewMotion.setVisibility(View.VISIBLE);
-            greenImgViewMotion.setVisibility(View.INVISIBLE);
-            motionSensedText.setText("Motion Detected");
+            circle.setImageBitmap(redCircle);
+            motionStatus.setText("Motion Detected");
             //reset timer
-            motionTimeText.setText("Last movement detected: 0 seconds ago");
-            timeMotion = 0;
-
-
+            motionTime.setText("Last movement detected: 0 seconds ago");
         } else {
-            motionSensedText.setText("No Motion Detected");
-            countMotion = true;
-            greenImgViewMotion.setVisibility(View.VISIBLE);
-            redImgViewMotion.setVisibility(View.INVISIBLE);
-
-
+            motionStatus.setText("No Motion Detected");
+            circle.setImageBitmap(greenCircle);
         }
     }
 
-    private void updateUIHumanStatus(boolean isHuman) {
+    private void updateUIHumanStatus(boolean isHuman, String cameraId) {
+        ScrollView scrollView = findViewById(R.id.cameraScrollView);
+        LinearLayout verticalMainLayout = null;
+        for (int i = 0; i < scrollView.getChildCount(); i++) {
+            LinearLayout layout = (LinearLayout) scrollView.getChildAt(i);
+            if (((TextView) layout.getChildAt(0)).getText().toString().equals(cameraId)) {
+                verticalMainLayout = layout;
+            }
+        }
+        LinearLayout humanLayout = (LinearLayout) verticalMainLayout.getChildAt(1);
+        ImageView circle = (ImageView) humanLayout.getChildAt(0);
+
+        TextView humanTime = (TextView) verticalMainLayout.getChildAt(3);
+        TextView humanStatus = (TextView) humanLayout.getChildAt(1);
+
+
         if (isHuman == true) {
-            redImgViewHuman.setVisibility(View.VISIBLE);
-            greenImgViewHuman.setVisibility(View.INVISIBLE);
-            countHuman = false;
-            timeHuman = 0;
-            humanSensedText.setText("Humans Detected");
-            humanTimeText.setText("Last human seen: 0 seconds ago");
+            circle.setImageBitmap(redCircle);
+            humanStatus.setText("Humans Detected");
+            humanTime.setText("Last human seen: 0 seconds ago");
         } else {
-            humanSensedText.setText("No Humans Detected");
-            greenImgViewHuman.setVisibility(View.VISIBLE);
-            redImgViewHuman.setVisibility(View.INVISIBLE);
-            countHuman = true;
+            circle.setImageBitmap(greenCircle);
+            humanStatus.setText("No Humans Detected");
 
         }
     }

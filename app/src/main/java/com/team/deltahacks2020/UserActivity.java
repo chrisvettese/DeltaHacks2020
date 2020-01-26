@@ -154,7 +154,6 @@ public class UserActivity extends AppCompatActivity {
         ImageView humanCircle = new ImageView(this);
         humanCircle.setImageBitmap(greenCircle);
         TextView humanStateText = new TextView(this);
-        humanStateText.setTypeface(null, Typeface.BOLD);
         humanStateText.setText("No Humans Detected");
         horizontalLayoutHuman.addView(humanCircle);
         horizontalLayoutHuman.addView(humanStateText);
@@ -165,19 +164,16 @@ public class UserActivity extends AppCompatActivity {
         ImageView motionCircle = new ImageView(this);
         motionCircle.setImageBitmap(greenCircle);
         TextView motionStateText = new TextView(this);
-        motionStateText.setTypeface(null, Typeface.BOLD);
         motionStateText.setText("No Motion Detected");
         horizontalLayoutMotion.addView(motionCircle);
         horizontalLayoutMotion.addView(motionStateText);
         cameraLayout.addView(horizontalLayoutMotion);
 
         TextView humanUpdateText = new TextView(this);
-        humanUpdateText.setTypeface(null, Typeface.BOLD);
         humanUpdateText.setText("Last human seen: 0 seconds ago");
         cameraLayout.addView(humanUpdateText);
 
         TextView motionUpdateText = new TextView(this);
-        motionUpdateText.setTypeface(null, Typeface.BOLD);
         motionUpdateText.setText("Last movement seen: 0 seconds ago");
         cameraLayout.addView(motionUpdateText);
 

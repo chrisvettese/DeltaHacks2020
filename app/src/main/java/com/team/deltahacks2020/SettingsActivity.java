@@ -110,9 +110,9 @@ public class SettingsActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             }
-
-                            Toast.makeText(getBaseContext(), s + " umm yay?",
-                                    Toast.LENGTH_SHORT).show();
+                            /*
+                            Toast.makeText(getBaseContext(), "This device has been registered as user",
+                                    Toast.LENGTH_SHORT).show();*/
                         } catch (Exception e) {
                             Intent intent = new Intent(this, CameraActivity.class);
                             startActivity(intent);
@@ -185,12 +185,10 @@ public class SettingsActivity extends AppCompatActivity {
 
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Toast.makeText(getBaseContext(), "Ooga :(",
-                                    Toast.LENGTH_SHORT).show();
                         }
 
                     } else {
-                        Toast.makeText(getBaseContext(), "Blehhhh", Toast.LENGTH_SHORT).show();
+                        System.out.println(task.getException());
                     }
                 });
 

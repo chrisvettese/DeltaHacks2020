@@ -146,8 +146,8 @@ public class CameraActivity extends AppCompatActivity {
             public void onOpened(CameraDevice cameraDevice) {
                 CameraActivity.this.cameraDevice = cameraDevice;
                 if (!cameraIsOpen) {
-                    createPreviewSession();
                     cameraIsOpen = true;
+                    createPreviewSession();
                 }
             }
 
@@ -166,7 +166,7 @@ public class CameraActivity extends AppCompatActivity {
             }
         };
     }
-
+/*
     @Override
     protected void onResume() {
         super.onResume();
@@ -177,7 +177,7 @@ public class CameraActivity extends AppCompatActivity {
         } else {
             textureView.setSurfaceTextureListener(surfaceTextureListener);
         }
-    }
+    }*/
 
     @Override
     protected void onStop() {

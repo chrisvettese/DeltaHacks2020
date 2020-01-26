@@ -187,7 +187,7 @@ public class CameraActivity extends AppCompatActivity {
             }
         };
     }
-/*
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -198,7 +198,7 @@ public class CameraActivity extends AppCompatActivity {
         } else {
             textureView.setSurfaceTextureListener(surfaceTextureListener);
         }
-    }*/
+    }
 
     @Override
     protected void onStop() {

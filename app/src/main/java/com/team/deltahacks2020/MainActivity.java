@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         } catch (ApiException e) {
-            Log.w("Error", "signInResult:failed code=" + e.getStatusCode());
+            Log.e("Error", "signInResult:failed code=" + e.getStatusCode());
         }
 
 //            Context context = getApplicationContext();

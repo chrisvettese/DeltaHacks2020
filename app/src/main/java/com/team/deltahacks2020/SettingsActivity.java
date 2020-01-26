@@ -100,6 +100,14 @@ public class SettingsActivity extends AppCompatActivity {
                             InputRead.close();
                             //if s matches firebase than go to user intent
                             //else go to camera
+                            if (s.equals( task.getResult().get("userID").toString())){
+                                Intent intent = new Intent(this,UserActivity.class);
+                                startActivity(intent);
+                            }
+                            else{
+                                Intent intent = new Intent(this, CameraActivity.class);
+                                startActivity(intent);
+                            }
 
 
 

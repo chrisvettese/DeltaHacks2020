@@ -110,9 +110,9 @@ public class SettingsActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             }
-
-                            Toast.makeText(getBaseContext(), s + " umm yay?",
-                                    Toast.LENGTH_SHORT).show();
+                            /*
+                            Toast.makeText(getBaseContext(), "This device has been registered as user",
+                                    Toast.LENGTH_SHORT).show();*/
                         } catch (Exception e) {
                             Intent intent = new Intent(this, CameraActivity.class);
                             startActivity(intent);
@@ -155,6 +155,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void cameraClick(View view) {
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
+        finish();
     }
 
     public void userClick(View view) {
@@ -176,8 +177,7 @@ public class SettingsActivity extends AppCompatActivity {
                             outputWriter.close();
 
                             //display file saved message
-                            Toast.makeText(getBaseContext(), "File saved successfully!",
-                                    Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getBaseContext(), "File saved successfully!",Toast.LENGTH_SHORT).show();
 
                             Intent switchActivity = new Intent(SettingsActivity.this, UserActivity.class);
                             startActivity(switchActivity);
@@ -185,27 +185,23 @@ public class SettingsActivity extends AppCompatActivity {
 
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Toast.makeText(getBaseContext(), "Ooga :(",
-                                    Toast.LENGTH_SHORT).show();
                         }
 
                     } else {
-                        Toast.makeText(getBaseContext(), "Blehhhh", Toast.LENGTH_SHORT).show();
+                        System.out.println(task.getException());
                     }
                 });
+
 
 
     }
 
 
     private void signOut() {
-        mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Intent switchIntent = new Intent(SettingsActivity.this, MainActivity.class);
-                startActivity(switchIntent);
-                finish();
-            }
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
+            Intent switchIntent = new Intent(SettingsActivity.this, MainActivity.class);
+            startActivity(switchIntent);
+            finish();
         });
     }
 }

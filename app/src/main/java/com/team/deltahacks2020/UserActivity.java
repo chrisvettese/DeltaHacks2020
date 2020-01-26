@@ -61,6 +61,11 @@ public class UserActivity extends AppCompatActivity {
                     boolean status = (Boolean) motionStatus;
                     updateUIMotionStatus(status);
                 }
+                Object humanStatus = snapshot.get("motionAlert");
+                if (humanStatus != null) {
+                    boolean status = (Boolean) humanStatus;
+                    updateUIHumanStatus(status);
+                }
             } else {
                 System.out.println("TEST : null");
             }
@@ -87,5 +92,8 @@ public class UserActivity extends AppCompatActivity {
             mtextView.setText("Motion Not Detected");
 
         }
+    }
+    private void updateUIHumanStatus(boolean isHuman) {
+
     }
 }

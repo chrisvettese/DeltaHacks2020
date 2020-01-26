@@ -16,12 +16,18 @@ import com.google.firebase.firestore.*;
 
 public class UserActivity extends AppCompatActivity {
 
-    TextView mtextView;
-    ImageView redImgView;
+    private TextView mtextView;
+    private ImageView redImgView;
+    private ImageView greenImgView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
+
+        redImgView = findViewById(R.id.redCircle);
+        greenImgView = findViewById(R.id.greenCircle);
+        mtextView = findViewById(R.id.motionTV);
 
         ImageView myImageView = findViewById(R.id.redCircle);
         myImageView.setImageResource(R.drawable.redcircle);
@@ -48,14 +54,14 @@ public class UserActivity extends AppCompatActivity {
         });
     }
     private void updateUIMotionStatus(boolean isMotion) {
-        redImgView = findViewById(R.id.redCircle);
-        mtextView = findViewById(R.id.motionTV);
 
         if (isMotion == true) {
-            redImgView.setVisibility(View.INVISIBLE);
+            redImgView.setVisibility(View.VISIBLE);
+            greenImgView.setVisibility(View.INVISIBLE);
             mtextView.setText("Motion Detected");
         } else {
-            redImgView.setVisibility(View.VISIBLE);
+            greenImgView.setVisibility(View.VISIBLE);
+            redImgView.setVisibility(View.INVISIBLE);
             mtextView.setText("Motion Not Detected");
 
         }

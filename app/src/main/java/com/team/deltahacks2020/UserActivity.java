@@ -64,7 +64,7 @@ public class UserActivity extends AppCompatActivity {
 
             @Override
             public void onTick(long millisUntilFinished) {
-                ScrollView view = findViewById(R.id.cameraScrollView);
+                LinearLayout view = findViewById(R.id.mainUserLayout);
                 for (int i = 0; i < view.getChildCount(); i++) {
                     LinearLayout verticalMainLayout = (LinearLayout) view.getChildAt(i);
                     LinearLayout humanLayout = (LinearLayout) verticalMainLayout.getChildAt(1);
@@ -171,8 +171,8 @@ public class UserActivity extends AppCompatActivity {
         motionUpdateText.setText("Last movement seen: 0 seconds ago");
         cameraLayout.addView(motionUpdateText);
 
-        ScrollView scrollView = findViewById(R.id.cameraScrollView);
-        scrollView.addView(cameraLayout);
+        LinearLayout mainUserLayout = findViewById(R.id.mainUserLayout);
+        mainUserLayout.addView(cameraLayout);
     }
 
     public void logOutClick(View view) {
@@ -189,10 +189,10 @@ public class UserActivity extends AppCompatActivity {
     }
 
     private void updateUIMotionStatus(boolean isMotion, String cameraId) {
-        ScrollView scrollView = findViewById(R.id.cameraScrollView);
+        LinearLayout mainUserLayout = findViewById(R.id.mainUserLayout);
         LinearLayout verticalMainLayout = null;
-        for (int i = 0; i < scrollView.getChildCount(); i++) {
-            LinearLayout layout = (LinearLayout) scrollView.getChildAt(i);
+        for (int i = 0; i < mainUserLayout.getChildCount(); i++) {
+            LinearLayout layout = (LinearLayout) mainUserLayout.getChildAt(i);
             if (((TextView) layout.getChildAt(0)).getText().toString().equals(cameraId)) {
                 verticalMainLayout = layout;
             }
@@ -215,10 +215,10 @@ public class UserActivity extends AppCompatActivity {
     }
 
     private void updateUIHumanStatus(boolean isHuman, String cameraId) {
-        ScrollView scrollView = findViewById(R.id.cameraScrollView);
+        LinearLayout linearLayout = findViewById(R.id.mainUserLayout);
         LinearLayout verticalMainLayout = null;
-        for (int i = 0; i < scrollView.getChildCount(); i++) {
-            LinearLayout layout = (LinearLayout) scrollView.getChildAt(i);
+        for (int i = 0; i < linearLayout.getChildCount(); i++) {
+            LinearLayout layout = (LinearLayout) linearLayout.getChildAt(i);
             if (((TextView) layout.getChildAt(0)).getText().toString().equals(cameraId)) {
                 verticalMainLayout = layout;
             }

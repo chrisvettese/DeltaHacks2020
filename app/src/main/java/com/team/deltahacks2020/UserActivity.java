@@ -71,8 +71,8 @@ public class UserActivity extends AppCompatActivity {
 
         redImgViewMotion = findViewById(R.id.redCircleMotion);
         greenImgViewMotion = findViewById(R.id.greenCircleMotion);
-        redImgViewMotion = findViewById(R.id.redCircleHuman);
-        greenImgViewMotion = findViewById(R.id.greenCircleHuman);
+        redImgViewHuman = findViewById(R.id.redCircleHuman);
+        greenImgViewHuman = findViewById(R.id.greenCircleHuman);
 
         humanTimeText = findViewById(R.id.humanTV);
         motionTimeText = findViewById(R.id.motionTime);
@@ -117,7 +117,8 @@ public class UserActivity extends AppCompatActivity {
     }
     @Override
     public void onStop() {
-
+        super.onStop();
+        timer.cancel();
     }
 
     private void updateUIMotionStatus(boolean isMotion) {
@@ -137,7 +138,6 @@ public class UserActivity extends AppCompatActivity {
             countMotion = true;
             greenImgViewMotion.setVisibility(View.VISIBLE);
             redImgViewMotion.setVisibility(View.INVISIBLE);
-            //start timer
 
 
         }

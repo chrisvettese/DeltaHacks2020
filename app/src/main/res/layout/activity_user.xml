@@ -40,14 +40,15 @@
             app:layout_constraintVertical_bias="0.001"/>
     <TextView
             android:text="Last movement detected: 0 seconds ago"
-            android:layout_width="355dp"
-            android:layout_height="22dp"
+            android:layout_width="322dp"
+            android:layout_height="20dp"
             android:id="@+id/motionTime"
             android:layout_marginTop="24dp" app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/humanTV"
             app:layout_constraintVertical_bias="0.046" app:layout_constraintEnd_toEndOf="parent"
-    />
+            app:layout_constraintHorizontal_bias="0.0" android:layout_marginStart="37dp"
+            android:layout_marginEnd="262dp"/>
     <TextView
             android:text="Last human seen: 0 seconds ago"
             android:layout_width="322dp"

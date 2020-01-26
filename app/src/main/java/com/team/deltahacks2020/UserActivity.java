@@ -58,7 +58,7 @@ public class UserActivity extends AppCompatActivity {
             public void onFinish() {
 
             }
-        };
+        }.start();
         timeHuman = 0;
         timeMotion = 0;
 

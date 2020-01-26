@@ -66,8 +66,6 @@ public class CameraActivity extends AppCompatActivity {
     private boolean humanStatus;
     private int motionPictureCount;
 
-    private long cameraKey;
-
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
     private static final List<String> humanIdentifiers = new ArrayList<String>() {
@@ -117,8 +115,6 @@ public class CameraActivity extends AppCompatActivity {
         motionStatus = false;
         humanStatus = false;
         motionPictureCount = 0;
-
-        cameraKey = System.currentTimeMillis();
 
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
@@ -322,7 +318,7 @@ public class CameraActivity extends AppCompatActivity {
         if (pictureTimer != null) {
             return;
         }
-        pictureTimer = new CountDownTimer(9000000000000000000l, 200) {
+        pictureTimer = new CountDownTimer(9000000000000000000l, 1500) {
             @Override
             public void onTick(long millisUntilFinished) {
                 Bitmap bitmap = textureView.getBitmap().copy(textureView.getBitmap().getConfig(), false);
@@ -426,10 +422,10 @@ public class CameraActivity extends AppCompatActivity {
         //Motion detected!
         if (sum > 800000) {
             System.out.println("AMOUNT MOTION TRUE");
-            if (motionStatus == false) {
+            //if (motionStatus == false) {
                 motionStatus = true;
                 sendMotionAlert(true);
-            }
+            //}
             if (motionPictureCount % 5 == 0) {
                 labeler.processImage(image).addOnSuccessListener(detectedImages -> {
                     int allConfidenceHumanCount = 0;
@@ -443,25 +439,25 @@ public class CameraActivity extends AppCompatActivity {
                         }
                     }
                     if (allConfidenceHumanCount >= 1 /*|| highConfidenceHumanCount >= 2*/) {
-                        if (humanStatus == false) {
+                        //if (humanStatus == false) {
                             humanStatus = true;
                             sendHumanAlert(true);
-                        }
+                        //}
                     }
                     else if (allConfidenceHumanCount == 0) {
-                        if (humanStatus == true) {
+                        //if (humanStatus == true) {
                             humanStatus = false;
                             sendHumanAlert(false);
-                        }
+                        //}
                     }
                 });
             }
         } else {
             System.out.println("AMOUNT MOTION FALSE");
-            if (motionStatus == true) {
+            //if (motionStatus == true) {
                 motionStatus = false;
                 sendMotionAlert(false);
-            }
+            //}
         }
 
         if (!lastImage.isRecycled()) {
@@ -471,7 +467,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void sendMotionAlert(boolean alertStatus) {
-        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert-" + cameraKey, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert-" + MainActivity.cameraId, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
 
             } else {
@@ -486,7 +482,7 @@ public class CameraActivity extends AppCompatActivity {
         });
     }
     private void sendHumanAlert(boolean alertStatus) {
-        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("humanAlert-" + cameraKey, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("humanAlert-" + MainActivity.cameraId, alertStatus).addOnCompleteListener((@NonNull Task<Void> task)->{
             if (task.isSuccessful()) {
 
             } else {

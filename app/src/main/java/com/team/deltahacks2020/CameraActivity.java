@@ -26,6 +26,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
@@ -196,7 +197,7 @@ public class CameraActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         openBackgroundThread();
-        if (textureView.isAvailable()) {
+        if (textureView != null && textureView.isAvailable()) {
             setUpCamera();
             openCamera();
         } else {
@@ -474,6 +475,11 @@ public class CameraActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
 
             } else {
+                if (task.getException() instanceof FirebaseFirestoreException) {
+                    Map<String, Object> placeholder = new HashMap<>();
+                    placeholder.put("place", "holder");
+                    db.collection("controller").document(auth.getCurrentUser().getEmail()).set(placeholder);
+                }
                 System.out.println("ERROR: " + "Failed to update motionAlert");
                 task.getException().printStackTrace();
             }

@@ -2,6 +2,7 @@ package com.team.deltahacks2020;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.*;
@@ -11,21 +12,22 @@ import android.hardware.camera2.*;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
-import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.HandlerThread;
+import android.os.*;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
@@ -37,12 +39,15 @@ import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetector;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions;
+import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +71,9 @@ public class CameraActivity extends AppCompatActivity {
     private FirebaseVisionImageLabeler labeler;
     private FirebaseVisionFaceDetector detector;
 
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
+
     private Bitmap lastImage;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
@@ -81,6 +89,9 @@ public class CameraActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
 
@@ -357,44 +368,51 @@ public class CameraActivity extends AppCompatActivity {
                 for (FirebaseVisionFace vImageLabel : detectedFaces) {
                     System.out.println("AMOUNT TRACK:" + vImageLabel.getTrackingId());
                 }*/
-                if (lastImage == null) {
-                    lastImage = image.getBitmap();
-                }
-                if (lastImage.isRecycled()) {
-                    lastImage = image.getBitmap();
-                    return;
+        if (lastImage == null) {
+            lastImage = image.getBitmap();
+        }
+        if (lastImage.isRecycled()) {
+            lastImage = image.getBitmap();
+            return;
 
-                }
-                int rSum = 0, gSum = 0, bSum = 0;
+        }
+        int rSum = 0, gSum = 0, bSum = 0;
 
-                for (int i = 0; i < lastImage.getWidth(); i+=10) {
-                    for (int j = 0; j < lastImage.getHeight(); j+=10) {
-                        int lastPixel = lastImage.getPixel(i, j);
-                        int thisPixel = image.getBitmap().getPixel(i, j);
-                        rSum += Math.abs(Color.red(thisPixel) - Color.red(lastPixel));
-                        gSum += Math.abs(Color.green(thisPixel) - Color.green(lastPixel));
-                        bSum += Math.abs(Color.blue(thisPixel) - Color.blue(lastPixel));
-                    }
-                }
-                int sum = rSum + gSum + bSum;
-                //Motion detected!
-                if (sum > 1000000) {
-                    sendMotionAlert();
-                }
-                System.out.println("AMOUNT MOTION " + (sum > 1000000));
+        for (int i = 0; i < lastImage.getWidth(); i += 10) {
+            for (int j = 0; j < lastImage.getHeight(); j += 10) {
+                int lastPixel = lastImage.getPixel(i, j);
+                int thisPixel = image.getBitmap().getPixel(i, j);
+                rSum += Math.abs(Color.red(thisPixel) - Color.red(lastPixel));
+                gSum += Math.abs(Color.green(thisPixel) - Color.green(lastPixel));
+                bSum += Math.abs(Color.blue(thisPixel) - Color.blue(lastPixel));
+            }
+        }
+        int sum = rSum + gSum + bSum;
+        //Motion detected!
+        if (sum > 1000000) {
+            sendMotionAlert();
+        }
+        System.out.println("AMOUNT MOTION " + (sum > 1000000));
 
-                if (!lastImage.isRecycled()) {
-                    lastImage.recycle();
-                }
-                lastImage = image.getBitmap();
-            //});
+        if (!lastImage.isRecycled()) {
+            lastImage.recycle();
+        }
+        lastImage = image.getBitmap();
+        //});
         //})
-              //  .addOnFailureListener(e -> {
-                    // Task failed with an exception
-                    // ...
-            //    });
+        //  .addOnFailureListener(e -> {
+        // Task failed with an exception
+        // ...
+        //    });
     }
-    private void sendMotionAlert() {
 
+    private void sendMotionAlert() {
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).update("motionAlert", System.currentTimeMillis()).addOnCompleteListener((@NonNull Task<Void> task)->{
+            if (task.isSuccessful()) {
+
+            } else {
+                System.out.println("ERROR: " + "Failed to update motionAlert");
+            }
+        });
     }
 }

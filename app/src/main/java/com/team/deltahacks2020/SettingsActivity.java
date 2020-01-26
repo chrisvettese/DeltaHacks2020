@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -13,14 +14,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,7 +29,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import javax.annotation.Nonnull;
 import java.io.*;
-import java.text.BreakIterator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,15 +36,14 @@ public class SettingsActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-    String userID;
-    Button userButt;
-    Button camButt;
-    GoogleSignInOptions gso;
-    TextView statusTextView;
+    private String userID;
+    private Button userButt;
+    private Button camButt;
 
 
-    GoogleSignInClient mGoogleSignInClient;
-    Button signOut;
+    private GoogleSignInOptions gso;
+    private GoogleSignInClient mGoogleSignInClient;
+    private Button signOut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +53,11 @@ public class SettingsActivity extends AppCompatActivity {
         userButt = findViewById(R.id.userButton);
         camButt = findViewById(R.id.cameraButton);
 
-
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         //reads from a file the userID
         //userID = readFromFile();
@@ -67,11 +67,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         signOut = findViewById(R.id.btnSignOut);
         signOut.setOnClickListener(v -> {
-            switch (v.getId()) {
-                case R.id.btnSignOut:
-                    signOut();
-                    break;
-            }
+            signOut();
         });
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
         if (acct != null) {
@@ -79,63 +75,53 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
 
-
-
         db.collection("controller").document(auth.getCurrentUser().getEmail()).get()
-                .addOnCompleteListener((@Nonnull Task<DocumentSnapshot> task)-> {
-                    if(task.isSuccessful() && !task.getResult().exists()){
+                .addOnCompleteListener((@Nonnull Task<DocumentSnapshot> task) -> {
+                    if (task.isSuccessful() && !task.getResult().exists()) {
                         //ask if uer or camera
                         camButt.setVisibility(View.VISIBLE);
                         userButt.setVisibility(View.VISIBLE);
-                    } else{
+                    } else {
                         String fileName = auth.getCurrentUser().getEmail() + ".txt";
 
 
                         try {
-                            FileInputStream fileIn=openFileInput(fileName);
-                            InputStreamReader InputRead= new InputStreamReader(fileIn);
+                            FileInputStream fileIn = openFileInput(fileName);
+                            InputStreamReader InputRead = new InputStreamReader(fileIn);
 
-                            char[] inputBuffer= new char[100];
-                            String s="";
+                            char[] inputBuffer = new char[100];
+                            String s = "";
                             int charRead;
 
-                            while ((charRead=InputRead.read(inputBuffer))>0) {
+                            while ((charRead = InputRead.read(inputBuffer)) > 0) {
                                 // char to string conversion
-                                String readstring=String.copyValueOf(inputBuffer,0,charRead);
-                                s +=readstring;
+                                String readstring = String.copyValueOf(inputBuffer, 0, charRead);
+                                s += readstring;
                             }
                             InputRead.close();
                             //if s matches firebase than go to user intent
                             //else go to camera
-                            if (s.equals( task.getResult().get("userID").toString())){
-                                Intent intent = new Intent(this,UserActivity.class);
+                            if (s.equals(task.getResult().get("userID").toString())) {
+                                Intent intent = new Intent(this, UserActivity.class);
                                 startActivity(intent);
-                            }
-                            else{
+                                finish();
+                            } else {
                                 Intent intent = new Intent(this, CameraActivity.class);
                                 startActivity(intent);
+                                finish();
                             }
-
-
-
 
                             Toast.makeText(getBaseContext(), s + " umm yay?",
                                     Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
-                            Toast.makeText(getBaseContext(), "Arghhhhh",
-                                    Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(this, CameraActivity.class);
+                            startActivity(intent);
+                            finish();
                         }
-
-
 
 
                     }
                 });
-        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
     }
 
 
@@ -144,21 +130,20 @@ public class SettingsActivity extends AppCompatActivity {
         try {
             InputStream inputStream = openFileInput("settings.txt");
 
-            if ( inputStream != null ) {
+            if (inputStream != null) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 String receiveString = "";
                 StringBuilder stringBuilder = new StringBuilder();
 
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                while ((receiveString = bufferedReader.readLine()) != null) {
                     stringBuilder.append(receiveString);
                 }
 
                 inputStream.close();
                 ret = stringBuilder.toString();
             }
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             System.out.println("login activity File not found: " + e.toString());
         } catch (IOException e) {
             System.out.println("login activity Can not read file: " + e.toString());
@@ -167,69 +152,61 @@ public class SettingsActivity extends AppCompatActivity {
         return ret;
     }
 
-    public void cameraClick(View view){
+    public void cameraClick(View view) {
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
     }
-    public void userClick(View view){
+
+    public void userClick(View view) {
 
         //save id to firebase
-        Map<String,Long> idMap = new HashMap<>();
+        Map<String, Long> idMap = new HashMap<>();
         Long time = System.currentTimeMillis();
-        idMap.put("userID", time );
+        idMap.put("userID", time);
         db.collection("controller").document(auth.getCurrentUser().getEmail()).set(idMap)
-                .addOnCompleteListener((@NonNull Task<Void> task)->{
-            if (task.isSuccessful()) {
+                .addOnCompleteListener((@NonNull Task<Void> task) -> {
+                    if (task.isSuccessful()) {
 
-                String fileName = auth.getCurrentUser().getEmail() + ".txt";
+                        String fileName = auth.getCurrentUser().getEmail() + ".txt";
 
-                try {
-                    FileOutputStream fileout=openFileOutput(fileName, MODE_PRIVATE);
-                    OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
-                    outputWriter.write(Long.toString(time));
-                    outputWriter.close();
+                        try {
+                            FileOutputStream fileout = openFileOutput(fileName, MODE_PRIVATE);
+                            OutputStreamWriter outputWriter = new OutputStreamWriter(fileout);
+                            outputWriter.write(Long.toString(time));
+                            outputWriter.close();
 
-                    //display file saved message
-                    Toast.makeText(getBaseContext(), "File saved successfully!",
-                            Toast.LENGTH_SHORT).show();
+                            //display file saved message
+                            Toast.makeText(getBaseContext(), "File saved successfully!",
+                                    Toast.LENGTH_SHORT).show();
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(getBaseContext(), "Ooga :(",
-                            Toast.LENGTH_SHORT).show();
-                }
+                            Intent switchActivity = new Intent(SettingsActivity.this, UserActivity.class);
+                            startActivity(switchActivity);
+                            finish();
 
-            } else {
-                Toast.makeText(getBaseContext(), "Blehhhh",Toast.LENGTH_SHORT).show();
-            }
-        });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(getBaseContext(), "Ooga :(",
+                                    Toast.LENGTH_SHORT).show();
+                        }
 
-
-
-
+                    } else {
+                        Toast.makeText(getBaseContext(), "Blehhhh", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
 
     }
 
 
-
-
-
-
-
-//    private void signOut() {
-//        mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                Toast.makeText(SettingsActivity.this, "Signed out", Toast.LENGTH_SHORT);
-//            }
-//        });
-//    }
-    
     private void signOut() {
-        FirebaseAuth.getInstance().signOut();
-        finish();
-
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Intent switchIntent = new Intent(SettingsActivity.this, MainActivity.class);
+                startActivity(switchIntent);
+                finish();
+            }
+        });
     }
 }
 

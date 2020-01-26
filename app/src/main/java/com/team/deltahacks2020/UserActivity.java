@@ -138,6 +138,7 @@ public class UserActivity extends AppCompatActivity {
     private void addToScrollView(String cameraId) {
         LinearLayout cameraLayout = new LinearLayout(this);
         cameraLayout.setOrientation(LinearLayout.VERTICAL);
+        cameraLayout.setPadding(0, 20, 0, 20);
 
         TextView text = new TextView(this);
         text.setText("Camera-" + cameraId);

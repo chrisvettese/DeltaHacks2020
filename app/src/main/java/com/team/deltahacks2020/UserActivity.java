@@ -117,14 +117,17 @@ public class UserActivity extends AppCompatActivity {
                         if (!value.equals(oldValueFromFirebase)) {
                             mapFromFirebase.put(key, value);
                             String[] splitKey = key.split("-");
-                            if (oldValueFromFirebase == null) {
-                                addToScrollView(splitKey[1]);
-                            }
                             //If this is an update to human movement
                             if (key.contains("humanAlert")) {
+                                if (oldValueFromFirebase == null && mapFromFirebase.get("motionAlert-" + splitKey[1]) == null) {
+                                    addToScrollView(splitKey[1]);
+                                }
                                 updateUIHumanStatus((Boolean) value, "Camera-" + splitKey[1]);
                                 //this is an update to motion sensor
                             } else {
+                                if (oldValueFromFirebase == null && mapFromFirebase.get("humanAlert-" + splitKey[1]) == null) {
+                                    addToScrollView(splitKey[1]);
+                                }
                                 updateUIMotionStatus((Boolean) value, "Camera-" + splitKey[1]);
                             }
                         }

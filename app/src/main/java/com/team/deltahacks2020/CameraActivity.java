@@ -318,7 +318,7 @@ public class CameraActivity extends AppCompatActivity {
         if (pictureTimer != null) {
             return;
         }
-        pictureTimer = new CountDownTimer(9000000000000000000l, 1500) {
+        pictureTimer = new CountDownTimer(9000000000000000000l, 1200) {
             @Override
             public void onTick(long millisUntilFinished) {
                 Bitmap bitmap = textureView.getBitmap().copy(textureView.getBitmap().getConfig(), false);

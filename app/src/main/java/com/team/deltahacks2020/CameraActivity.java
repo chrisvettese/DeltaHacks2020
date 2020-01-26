@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CameraActivity extends AppCompatActivity {
+    private boolean cameraIsOpen = false;
     private CameraManager cameraManager;
     private int cameraFacing;
     private TextureView.SurfaceTextureListener surfaceTextureListener;
@@ -144,18 +145,23 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onOpened(CameraDevice cameraDevice) {
                 CameraActivity.this.cameraDevice = cameraDevice;
-                createPreviewSession();
+                if (!cameraIsOpen) {
+                    createPreviewSession();
+                    cameraIsOpen = true;
+                }
             }
 
             @Override
             public void onDisconnected(CameraDevice cameraDevice) {
                 cameraDevice.close();
+                cameraIsOpen = false;
                 CameraActivity.this.cameraDevice = null;
             }
 
             @Override
             public void onError(CameraDevice cameraDevice, int error) {
                 cameraDevice.close();
+                cameraIsOpen = false;
                 CameraActivity.this.cameraDevice = null;
             }
         };

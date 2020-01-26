@@ -80,11 +80,11 @@ public class UserActivity extends AppCompatActivity {
 
                     if (countHuman) {
                         int currentTime = Integer.parseInt(humanTime.getText().toString().replaceAll("\\D+",""));
-                        humanTime.setText("Last human seen: " + (currentTime + 1) + "seconds ago");
+                        humanTime.setText("Last human seen: " + (currentTime + 1) + " seconds ago");
                     }
                     if (countMotion) {
                         int currentTime = Integer.parseInt(motionTime.getText().toString().replaceAll("\\D+",""));
-                        motionTime.setText("Last movement detected: " + (currentTime + 1) + "seconds ago");
+                        motionTime.setText("Last movement detected: " + (currentTime + 1) + " seconds ago");
                     }
                 }
             }

@@ -314,7 +314,9 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void startTakingPictures() {
-        System.out.println("TEST123 " + pictureTimer);
+        if (pictureTimer != null) {
+            return;
+        }
         pictureTimer = new CountDownTimer(90000000, 200) {
 
             public void onTick(long millisUntilFinished) {

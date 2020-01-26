@@ -155,6 +155,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void cameraClick(View view) {
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
+        finish();
     }
 
     public void userClick(View view) {

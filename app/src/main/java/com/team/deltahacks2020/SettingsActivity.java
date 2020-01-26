@@ -36,7 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-    private long userID;
+    public static String userID;
     private Button userButt;
     private Button camButt;
 
@@ -99,16 +99,16 @@ public class SettingsActivity extends AppCompatActivity {
                                 s += readstring;
                             }
                             inputRead.close();
-                            userID = Long.parseLong(s);
                             //if s matches firebase than go to user intent
                             //else go to camera
                             if (s.equals(task.getResult().get("userID").toString())) {
-                                Intent intent = new Intent(this, UserActivity.class);
+                                userID = s;
+                                Intent intent = new Intent(SettingsActivity.this, UserActivity.class);
                                 intent.putExtra("userID", userID);
                                 startActivity(intent);
                                 finish();
                             } else {
-                                Intent intent = new Intent(this, CameraActivity.class);
+                                Intent intent = new Intent(SettingsActivity.this, CameraActivity.class);
                                 startActivity(intent);
                                 finish();
                             }
@@ -116,7 +116,7 @@ public class SettingsActivity extends AppCompatActivity {
                             Toast.makeText(getBaseContext(), "This device has been registered as user",
                                     Toast.LENGTH_SHORT).show();*/
                         } catch (Exception e) {
-                            Intent intent = new Intent(this, CameraActivity.class);
+                            Intent intent = new Intent(SettingsActivity.this, CameraActivity.class);
                             startActivity(intent);
                             finish();
                         }

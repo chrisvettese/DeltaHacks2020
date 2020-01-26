@@ -39,7 +39,7 @@ public class UserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
-        userID = savedInstanceState.getLong("userID");
+        userID = Long.parseLong(getIntent().getStringExtra("userID"));
 
         mapFromFirebase = new HashMap<>();
 

@@ -77,8 +77,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         db.collection("controller").document(auth.getCurrentUser().getEmail()).get()
                 .addOnCompleteListener((@Nonnull Task<DocumentSnapshot> task) -> {
-                    if (task.isSuccessful() && !task.getResult().exists()) {
-                        //ask if uer or camera
+                    if (task.isSuccessful() && (!task.getResult().exists() || task.getResult().get("userID") == null)) {
+                        //ask if user or camera
                         camButt.setVisibility(View.VISIBLE);
                         userButt.setVisibility(View.VISIBLE);
                     } else {

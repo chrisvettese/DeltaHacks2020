@@ -1,6 +1,8 @@
 package com.team.deltahacks2020;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -48,7 +50,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         userButt = findViewById(R.id.userButton);
         camButt = findViewById(R.id.cameraButton);
-
+        camButt.setOnClickListener((View view)->{
+            Intent switchActivity = new Intent(this, CameraActivity.class);
+            startActivity(switchActivity);
+            finish();
+        });
         //reads from a file the userID
         //userID = readFromFile();
 

@@ -4,10 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.ImageFormat;
-import android.graphics.SurfaceTexture;
+import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.camera2.*;
@@ -34,6 +31,7 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObject;
 import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetector;
+import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -79,7 +77,13 @@ public class CameraActivity extends AppCompatActivity {
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         cameraFacing = CameraCharacteristics.LENS_FACING_BACK;
 
-        objectDetector = FirebaseVision.getInstance().getOnDeviceObjectDetector();
+        FirebaseVisionObjectDetectorOptions options =
+                new FirebaseVisionObjectDetectorOptions.Builder()
+                        .setDetectorMode(FirebaseVisionObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                        .enableMultipleObjects()
+                        .enableClassification()  // Optional
+                        .build();
+        objectDetector = FirebaseVision.getInstance().getOnDeviceObjectDetector(options);
 
         textureView = findViewById(R.id.texture_view);
 
@@ -209,11 +213,10 @@ public class CameraActivity extends AppCompatActivity {
             Surface previewSurface = new Surface(surfaceTexture);
             ImageReader reader = ImageReader.newInstance(previewSize.getWidth(), previewSize.getHeight(), ImageFormat.JPEG, 1);
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            //captureRequestBuilder.addTarget(previewSurface);
-            captureRequestBuilder.addTarget(reader.getSurface());
+            captureRequestBuilder.addTarget(previewSurface);
+            //captureRequestBuilder.addTarget(reader.getSurface());
             captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-            int rotation = getWindowManager().getDefaultDisplay().getRotation();
-            captureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
+
 
             ImageReader.OnImageAvailableListener readerListener = reader1 -> {
                 try (Image image = reader1.acquireLatestImage()) {
@@ -257,10 +260,10 @@ public class CameraActivity extends AppCompatActivity {
 
             public void onTick(long millisUntilFinished) {
                 Bitmap bitmap = textureView.getBitmap();
+
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byte[] byteArray = stream.toByteArray();
-                bitmap.recycle();
 
                 FirebaseVisionImageMetadata metadata = new FirebaseVisionImageMetadata.Builder()
                         .setWidth(bitmap.getWidth())   // 480x360 is typically sufficient for
@@ -269,8 +272,9 @@ public class CameraActivity extends AppCompatActivity {
                         .setRotation(getRotationCompensation(cameraId, CameraActivity.this, CameraActivity.this))
                         .build();
 
-                FirebaseVisionImage firebaseImage = FirebaseVisionImage.fromByteArray(byteArray, metadata);
-                //analyzeImage(firebaseImage);
+                //FirebaseVisionImage firebaseImage = FirebaseVisionImage.fromByteArray(byteArray, metadata);
+                FirebaseVisionImage firebaseImage = FirebaseVisionImage.fromBitmap(bitmap);
+                analyzeImage(firebaseImage);
             }
 
             public void onFinish() {
@@ -322,11 +326,11 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void analyzeImage(FirebaseVisionImage image) {
-        objectDetector.processImage(image)
-                .addOnSuccessListener(detectedObjects -> {
+        objectDetector.processImage(image).addOnSuccessListener(detectedObjects -> {
                     System.out.println("AMOUNT: "+detectedObjects.size());
-                            // Task completed successfully
-                            // ...
+                    for (FirebaseVisionObject vObj : detectedObjects)
+                    System.out.println("AMOUNT TYPE:"+vObj.getClassificationCategory());
+            image.getBitmap().recycle();
                         })
                 .addOnFailureListener(e -> {
                             // Task failed with an exception

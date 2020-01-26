@@ -165,6 +165,7 @@ public class SettingsActivity extends AppCompatActivity {
         //save id to firebase
         Map<String, Long> idMap = new HashMap<>();
         Long time = System.currentTimeMillis();
+        userID = time.toString();
         idMap.put("userID", time);
         db.collection("controller").document(auth.getCurrentUser().getEmail()).set(idMap)
                 .addOnCompleteListener((@NonNull Task<Void> task) -> {

@@ -2,7 +2,6 @@ package com.team.deltahacks2020;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -50,11 +49,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         userButt = findViewById(R.id.userButton);
         camButt = findViewById(R.id.cameraButton);
-        camButt.setOnClickListener((View view)->{
-            Intent switchActivity = new Intent(this, CameraActivity.class);
-            startActivity(switchActivity);
-            finish();
-        });
+
+
+
         //reads from a file the userID
         //userID = readFromFile();
 
@@ -74,27 +71,58 @@ public class SettingsActivity extends AppCompatActivity {
             String personName = acct.getDisplayName();
         }
 
-        //db.collection("controller").document("boogus@gmail.com").get()
+
+
+
         db.collection("controller").document(auth.getCurrentUser().getEmail()).get()
                 .addOnCompleteListener((@Nonnull Task<DocumentSnapshot> task)-> {
-                    if(!task.isSuccessful()){
-                        //ask if user or camera
+                    if(task.isSuccessful() && !task.getResult().exists()){
+                        //ask if uer or camera
                         camButt.setVisibility(View.VISIBLE);
                         userButt.setVisibility(View.VISIBLE);
-                    }
-                    /*
-                    else{
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()){
-                            String phoneID = task.getResult().get("userID").toString();
-                            //this means the phone is user
-                            if(userID == phoneID){
+                    } else{
+                        String fileName = auth.getCurrentUser().getEmail() + ".txt";
+
+
+                        try {
+                            FileInputStream fileIn=openFileInput(fileName);
+                            InputStreamReader InputRead= new InputStreamReader(fileIn);
+
+                            char[] inputBuffer= new char[100];
+                            String s="";
+                            int charRead;
+
+                            while ((charRead=InputRead.read(inputBuffer))>0) {
+                                // char to string conversion
+                                String readstring=String.copyValueOf(inputBuffer,0,charRead);
+                                s +=readstring;
                             }
-                            //this means the phone is a camera
+                            InputRead.close();
+                            //if s matches firebase than go to user intent
+                            //else go to camera
+                            if (s.equals( task.getResult().get("userID").toString())){
+                                Intent intent = new Intent(this,UserActivity.class);
+                                startActivity(intent);
+                            }
                             else{
+                                Intent intent = new Intent(this, CameraActivity.class);
+                                startActivity(intent);
                             }
+
+
+
+
+                            Toast.makeText(getBaseContext(), s + " umm yay?",
+                                    Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            Toast.makeText(getBaseContext(), "Arghhhhh",
+                                    Toast.LENGTH_SHORT).show();
                         }
-                    }*/
+
+
+
+
+                    }
                 });
     }
 
@@ -128,55 +156,44 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public void cameraClick(View view){
-
-
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
     }
     public void userClick(View view){
 
         //save id to firebase
-        Map<String,Object> idMap = new HashMap<>();
-        long time = System.currentTimeMillis();
-        idMap.put(userID, time );
-        db.collection("controller").document(auth.getCurrentUser().getEmail()).set(idMap);
+        Map<String,Long> idMap = new HashMap<>();
+        Long time = System.currentTimeMillis();
+        idMap.put("userID", time );
+        db.collection("controller").document(auth.getCurrentUser().getEmail()).set(idMap)
+                .addOnCompleteListener((@NonNull Task<Void> task)->{
+            if (task.isSuccessful()) {
 
-        //save id to internal Storage
-        //File file = new File("controller.txt");
+                String fileName = auth.getCurrentUser().getEmail() + ".txt";
 
+                try {
+                    FileOutputStream fileout=openFileOutput(fileName, MODE_PRIVATE);
+                    OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
+                    outputWriter.write(Long.toString(time));
+                    outputWriter.close();
 
-        try {
-            FileOutputStream fileout=openFileOutput("mytextfile.txt", MODE_PRIVATE);
-            OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
-            outputWriter.write(Long.toString(time));
-            outputWriter.close();
+                    //display file saved message
+                    Toast.makeText(getBaseContext(), "File saved successfully!",
+                            Toast.LENGTH_SHORT).show();
 
-            //display file saved message
-            Toast.makeText(getBaseContext(), "File saved successfully!",
-                    Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getBaseContext(), "Ooga :(",
+                            Toast.LENGTH_SHORT).show();
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            FileInputStream fileIn=openFileInput("mytextfile.txt");
-            InputStreamReader InputRead= new InputStreamReader(fileIn);
-
-            char[] inputBuffer= new char[100];
-            String s="";
-            int charRead;
-
-            while ((charRead=InputRead.read(inputBuffer))>0) {
-                // char to string conversion
-                String readstring=String.copyValueOf(inputBuffer,0,charRead);
-                s +=readstring;
+            } else {
+                Toast.makeText(getBaseContext(), "Blehhhh",Toast.LENGTH_SHORT).show();
             }
-            InputRead.close();
+        });
 
-            Toast.makeText(getBaseContext(), "File retrieved successfully!",
-                    Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+
 
 
 
